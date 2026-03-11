@@ -3,6 +3,8 @@
 #include "GasPickup.h"
 #include "Components/SphereComponent.h"
 #include "TimerManager.h"
+#include "CarChaosPlayerController.h"
+#include <Kismet/GameplayStatics.h>
 
 AGasPickup::AGasPickup()
 {
@@ -49,13 +51,13 @@ void AGasPickup::OnOverlap(
     bool bFromSweep,
     const FHitResult& SweepResult)
 {
-    if (!OtherActor) return;
+    if (!OtherActor || OtherActor == this) return;
 
-    // AMyVehicle* Vehicle = Cast<AMyVehicle>(OtherActor);
-    // if (Vehicle)
-    // {
-    //     Vehicle->AddGas(GasAmount); (Gas = FMath::Clamp(Gas + Amount, 0.f, MaxGas);)
-    // }
+    ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+    if (PC)
+    {
+         PC->AddGas();
+    }
 
     SetActorHiddenInGame(true);
     SetActorEnableCollision(false);

@@ -13,17 +13,35 @@ class CARCHAOS_API ACarChaosPlayerController : public APlayerController
 {
     GENERATED_BODY()
 
+public:
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
+    float MaxGas = 100.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
+    float CurrentGas = 100.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
+    float GasUsage = 5.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
+    float GasPickupValue = 30.f;
+
+    virtual void Tick(float DeltaTime) override;
+
+    void AddGas();
+
 protected:
 
     virtual void BeginPlay() override;
 
-    // Widget class set in editor
+    void UpdateGasBar();
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UMainHUDWidget> MainHUDWidgetClass;
 
 private:
 
-    // Actual widget instance
     UPROPERTY()
     UMainHUDWidget* MainHUDWidget;
 };

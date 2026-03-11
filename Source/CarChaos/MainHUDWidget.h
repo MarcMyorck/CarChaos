@@ -14,7 +14,6 @@ class CARCHAOS_API UMainHUDWidget : public UUserWidget
 
 public:
 
-    // This connects to the HealthBar widget inside the HUD blueprint
     UPROPERTY(meta = (BindWidget))
     UGasBarWidget* GasBarWidget;
 };
