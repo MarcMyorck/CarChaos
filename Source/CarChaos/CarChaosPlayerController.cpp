@@ -6,42 +6,55 @@
 void ACarChaosPlayerController::BeginPlay()
 {
     Super::BeginPlay();
-
     PrimaryActorTick.bCanEverTick = true;
 
-    if (MainHUDWidgetClass)
-    {
-        MainHUDWidget = CreateWidget<UMainHUDWidget>(this, MainHUDWidgetClass);
+    MainHUDWidget = CreateWidget<UMainHUDWidget>(this, MainHUDWidgetClass);
+    MainHUDWidget->AddToViewport();
 
-        if (MainHUDWidget)
-        {
-            MainHUDWidget->AddToViewport();
-        }
-    }
+    PlayerCarPawn = Cast<ACarChaosCarPawn>(GetPawn());
+    UpdateGasBarVisuals();
 
-    UpdateGasBar();
+    ULocalPlayer* LocalPlayer = GetLocalPlayer();
+    UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
+    Subsystem->AddMappingContext(InputMappingContext, 0);
 }
 
 void ACarChaosPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    CurrentGas = FMath::Clamp(CurrentGas - (GasUsage * DeltaTime), 0.f, MaxGas);
-    UpdateGasBar();
+    PlayerCarPawn->UpdateGasBarValue();
+    UpdateGasBarVisuals();
+}
+
+void ACarChaosPlayerController::SetupInputComponent()
+{
+    Super::SetupInputComponent();
+
+    UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent);
+    EIC->BindAction(IA_Drive, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleInput);
+}
+
+void ACarChaosPlayerController::HandleInput(const FInputActionValue& Value)
+{
+    const FVector2D Axis = Value.Get<FVector2D>();
+
+    PlayerCarPawn->ChangeSpeed(Axis.X);
+    PlayerCarPawn->Steer(Axis.Y);
 }
 
 void ACarChaosPlayerController::AddGas()
 {
-    CurrentGas = FMath::Clamp(CurrentGas + GasPickupValue, 0.f, MaxGas);
-    UpdateGasBar();
+    PlayerCarPawn->AddGas();
+    UpdateGasBarVisuals();
 }
 
-void ACarChaosPlayerController::UpdateGasBar()
+void ACarChaosPlayerController::UpdateGasBarVisuals()
 {
     if (MainHUDWidget && MainHUDWidget->GasBarWidget)
     {
-        MainHUDWidget->GasBarWidget->CurrentGas = CurrentGas;
-        MainHUDWidget->GasBarWidget->MaxGas = MaxGas;
+        MainHUDWidget->GasBarWidget->CurrentGas = PlayerCarPawn->CurrentGas;
+        MainHUDWidget->GasBarWidget->MaxGas = PlayerCarPawn->MaxGas;
         MainHUDWidget->GasBarWidget->UpdateGasBar();
     }
 }

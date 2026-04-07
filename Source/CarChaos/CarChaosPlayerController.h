@@ -4,8 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
+#include "InputAction.h"
+#include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
 #include "MainHUDWidget.h"
+#include "CarChaosCarPawn.h"
 #include "CarChaosPlayerController.generated.h"
 
 UCLASS()
@@ -15,19 +21,11 @@ class CARCHAOS_API ACarChaosPlayerController : public APlayerController
 
 public:
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
-    float MaxGas = 100.f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
-    float CurrentGas = 100.f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
-    float GasUsage = 5.f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
-    float GasPickupValue = 30.f;
-
     virtual void Tick(float DeltaTime) override;
+
+    virtual void SetupInputComponent() override;
+
+    void HandleInput(const FInputActionValue& Value);
 
     void AddGas();
 
@@ -35,7 +33,13 @@ protected:
 
     virtual void BeginPlay() override;
 
-    void UpdateGasBar();
+    void UpdateGasBarVisuals();
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputMappingContext* InputMappingContext;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_Drive;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UMainHUDWidget> MainHUDWidgetClass;
@@ -43,5 +47,9 @@ protected:
 private:
 
     UPROPERTY()
+    ACarChaosCarPawn* PlayerCarPawn;
+
+    UPROPERTY()
     UMainHUDWidget* MainHUDWidget;
+
 };
