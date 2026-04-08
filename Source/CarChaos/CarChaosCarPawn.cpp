@@ -40,20 +40,23 @@ void ACarChaosCarPawn::ChangeSpeed(float SpeedValue)
 
     if (SpeedValue > 0)
     {
-        CurrentSpeed = FMath::Clamp(CurrentSpeed + (AccelerationPower * DeltaTime), 0.f, TopSpeed);
+        FVector AccelerationForce = CarCollision->GetForwardVector() * AccelerationPower;
+        CarCollision->AddForce(AccelerationForce);
     }
     else if (SpeedValue < 0)
     {
-        CurrentSpeed = FMath::Clamp(CurrentSpeed + (BrakingPower * DeltaTime), -TopSpeed, 0.f);
+        FVector BrakingForce = CarCollision->GetForwardVector() * BrakingPower;
+        CarCollision->AddForce(BrakingForce);
+
+        FVector CurrentVelocity = CarCollision->GetPhysicsLinearVelocity();
+        if (CurrentVelocity.Size() < 5.f)
+        {
+            CarCollision->SetPhysicsLinearVelocity(FVector::ZeroVector);
+        }
     }
     else
     {
-        CurrentSpeed = FMath::FInterpTo(CurrentSpeed, 0.f, DeltaTime, 2.0f);
     }
-
-    FVector ForceToAdd = GetActorForwardVector() * CurrentSpeed * CarCollision->GetMass();
-
-    CarCollision->AddForce(ForceToAdd);
 }
 
 void ACarChaosCarPawn::Steer(float SteeringValue)
@@ -63,10 +66,7 @@ void ACarChaosCarPawn::Steer(float SteeringValue)
     // Smooth steering input
     CurrentSteering = FMath::FInterpTo(CurrentSteering, SteeringValue, DeltaTime, 5.0f);
 
-    // Reduce steering at high speed
-    float SpeedFactor = FMath::Clamp(CurrentSpeed / TopSpeed, 0.2f, 1.0f);
-
-    float TurnTorque = CurrentSteering * SteeringStrength * SpeedFactor * CarCollision->GetMass();
+    float TurnTorque = CurrentSteering * SteeringStrength;
 
     FVector Torque(0.f, 0.f, TurnTorque);
     CarCollision->AddTorqueInDegrees(Torque);

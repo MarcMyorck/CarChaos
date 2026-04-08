@@ -38,12 +38,6 @@ public:
 	UBoxComponent* CarCollision;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float CurrentSpeed = 0.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float TopSpeed = 10000.f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float AccelerationPower = 3000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
