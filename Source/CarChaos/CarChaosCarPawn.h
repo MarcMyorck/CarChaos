@@ -7,6 +7,7 @@
 #include "MainHUDWidget.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
 #include "CarChaosCarPawn.generated.h"
 
 UCLASS()
@@ -36,6 +37,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Car")
 	UCapsuleComponent* CarCollision;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Car")
+	TArray<USphereComponent*> WheelCollisions;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float AccelerationPower = 3000.f;
