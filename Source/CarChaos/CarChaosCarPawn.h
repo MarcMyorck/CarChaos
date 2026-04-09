@@ -6,7 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "MainHUDWidget.h"
 #include "GameFramework/FloatingPawnMovement.h"
-#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "CarChaosCarPawn.generated.h"
 
 UCLASS()
@@ -35,7 +35,7 @@ public:
 	void AddGas();
 
 	UPROPERTY(BlueprintReadOnly, Category = "Car")
-	UBoxComponent* CarCollision;
+	UCapsuleComponent* CarCollision;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float AccelerationPower = 3000.f;
@@ -44,10 +44,15 @@ public:
 	float BrakingPower = -4000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float Grip = 0.2f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float SteeringStrength = 10000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float CurrentSteering = 0.f;
+
+	bool IsGrounded();
 
 	void ChangeSpeed(float SpeedValue);
 
