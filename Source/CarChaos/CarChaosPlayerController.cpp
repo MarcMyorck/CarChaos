@@ -11,7 +11,7 @@ void ACarChaosPlayerController::BeginPlay()
     MainHUDWidget = CreateWidget<UMainHUDWidget>(this, MainHUDWidgetClass);
     MainHUDWidget->AddToViewport();
 
-    PlayerCarPawn = Cast<ACarChaosCarPawn>(GetPawn());
+    PlayerCarPawn = Cast<ACarChaosCarPawnPC>(GetPawn());
     UpdateGasBarVisuals();
 
     ULocalPlayer* LocalPlayer = GetLocalPlayer();

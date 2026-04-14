@@ -1,36 +1,40 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CarChaosCarPawn.h"
+#include "CarChaosCarPawnSphere.h"
 
 // Sets default values
-ACarChaosCarPawn::ACarChaosCarPawn()
+ACarChaosCarPawnSphere::ACarChaosCarPawnSphere()
 {
 
 }
 
 // Called when the game starts or when spawned
-void ACarChaosCarPawn::BeginPlay()
+void ACarChaosCarPawnSphere::BeginPlay()
 {
-	Super::BeginPlay();
-	PrimaryActorTick.bCanEverTick = true;
+    Super::BeginPlay();
+    PrimaryActorTick.bCanEverTick = true;
 
-    CarCollision = FindComponentByClass<UCapsuleComponent>();
-    GetComponents<USphereComponent>(WheelCollisions);
+    CarCollision = FindComponentByClass<USphereComponent>();
+    ArrowForward = FindComponentByClass<UArrowComponent>();
 }
 
 // Called every frame
-void ACarChaosCarPawn::Tick(float DeltaTime)
+void ACarChaosCarPawnSphere::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
-    if (IsGrounded()) 
+    FRotator CurrentRotation = ArrowForward->GetComponentRotation();
+    FRotator NewRotation(0.0f, 0.0f, CurrentRotation.Yaw);
+    ArrowForward->SetWorldRotation(NewRotation);
+
+    if (IsGrounded())
     {
         //Sideways Grip
         FVector Velocity = CarCollision->GetPhysicsLinearVelocity();
 
-        FVector Forward = CarCollision->GetForwardVector();
-        FVector Right = CarCollision->GetRightVector();
+        FVector Forward = ArrowForward->GetForwardVector();
+        FVector Right = ArrowForward->GetRightVector();
 
         float ForwardSpeed = FVector::DotProduct(Velocity, Forward);
         float SidewaysSpeed = FVector::DotProduct(Velocity, Right);
@@ -40,7 +44,7 @@ void ACarChaosCarPawn::Tick(float DeltaTime)
 
         FVector NewVelocity = ForwardVelocity + (SidewaysVelocity * Grip);
 
-        CarCollision->SetPhysicsLinearVelocity(NewVelocity);
+        //CarCollision->SetPhysicsLinearVelocity(NewVelocity);
 
         //General Settings
         CarCollision->SetLinearDamping(0.6f);
@@ -59,7 +63,7 @@ void ACarChaosCarPawn::Tick(float DeltaTime)
 
     FVector Downforce = -FVector::UpVector * Speed * 2.5f;
 
-    CarCollision->AddForce(Downforce);
+    //CarCollision->AddForce(Downforce);
 
     //Stabilization trying to stay upright
     FVector Up = CarCollision->GetUpVector();
@@ -72,50 +76,44 @@ void ACarChaosCarPawn::Tick(float DeltaTime)
     float UprightStrength = 50000000.f;
     FVector UprightTorque = TorqueAxis * UprightStrength;
 
-    CarCollision->AddTorqueInDegrees(UprightTorque);
+    //CarCollision->AddTorqueInDegrees(UprightTorque);
 }
 
-void ACarChaosCarPawn::UpdateGasBarValue()
+void ACarChaosCarPawnSphere::UpdateGasBarValue()
 {
     CurrentGas = FMath::Clamp(CurrentGas - (GasUsage * (GetWorld()->GetDeltaSeconds())), 0.f, MaxGas);
 }
 
-void ACarChaosCarPawn::AddGas()
+void ACarChaosCarPawnSphere::AddGas()
 {
-	CurrentGas = FMath::Clamp(CurrentGas + GasPickupValue, 0.f, MaxGas);
+    CurrentGas = FMath::Clamp(CurrentGas + GasPickupValue, 0.f, MaxGas);
 }
 
-bool ACarChaosCarPawn::IsGrounded()
+bool ACarChaosCarPawnSphere::IsGrounded()
 {
-    int GroundedWheels = 0;
-    float TraceDistance = 30.f;
+    float TraceDistance = 41.f;
     FHitResult Hit;
     FCollisionQueryParams Params;
     Params.AddIgnoredActor(this);
 
-    for (USphereComponent* Wheel : WheelCollisions)
-    {
-        FVector Start = Wheel->GetComponentLocation();
-        FVector End = Start - (FVector::UpVector * TraceDistance);
+    FVector Start = CarCollision->GetComponentLocation();
+    FVector End = Start - (FVector::UpVector * TraceDistance);
 
-        if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
-        {
-            GroundedWheels++;
-        }
+    if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params)) {
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Up: x: true"));
+        return true;
     }
-
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Up: x: %d"), GroundedWheels));
-
-    return GroundedWheels >= 2;
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Up: x: false"));
+    return false;
 }
 
-void ACarChaosCarPawn::ChangeSpeed(float SpeedValue)
+void ACarChaosCarPawnSphere::ChangeSpeed(float SpeedValue)
 {
     if (!IsGrounded()) return;
 
     float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-    FVector Forward = CarCollision->GetForwardVector();
+    FVector Forward = ArrowForward->GetForwardVector();
     FVector FlatForward = FVector::VectorPlaneProject(Forward, FVector::UpVector).GetSafeNormal();
 
     if (SpeedValue > 0)
@@ -139,7 +137,7 @@ void ACarChaosCarPawn::ChangeSpeed(float SpeedValue)
     }
 }
 
-void ACarChaosCarPawn::Steer(float SteeringValue)
+void ACarChaosCarPawnSphere::Steer(float SteeringValue)
 {
     float DeltaTime = GetWorld()->GetDeltaSeconds();
 

@@ -11,7 +11,7 @@
 #include "InputMappingContext.h"
 #include "Blueprint/UserWidget.h"
 #include "MainHUDWidget.h"
-#include "CarChaosCarPawn.h"
+#include "CarChaosCarPawnPC.h"
 #include "CarChaosPlayerController.generated.h"
 
 UCLASS()
@@ -47,7 +47,7 @@ protected:
 private:
 
     UPROPERTY()
-    ACarChaosCarPawn* PlayerCarPawn;
+    ACarChaosCarPawnPC* PlayerCarPawn;
 
     UPROPERTY()
     UMainHUDWidget* MainHUDWidget;

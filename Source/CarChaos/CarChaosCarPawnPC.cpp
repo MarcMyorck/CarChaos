@@ -1,36 +1,47 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CarChaosCarPawn.h"
+#include "CarChaosCarPawnPC.h"
 
 // Sets default values
-ACarChaosCarPawn::ACarChaosCarPawn()
+ACarChaosCarPawnPC::ACarChaosCarPawnPC()
 {
 
 }
 
 // Called when the game starts or when spawned
-void ACarChaosCarPawn::BeginPlay()
+void ACarChaosCarPawnPC::BeginPlay()
 {
-	Super::BeginPlay();
-	PrimaryActorTick.bCanEverTick = true;
+    Super::BeginPlay();
+    PrimaryActorTick.bCanEverTick = true;
 
-    CarCollision = FindComponentByClass<UCapsuleComponent>();
-    GetComponents<USphereComponent>(WheelCollisions);
+    CarBodyMesh = Cast<UStaticMeshComponent>(GetDefaultSubobjectByName(TEXT("body")));
+    DirectionArrow = FindComponentByClass<UArrowComponent>();
+
+    TArray<UStaticMeshComponent*> Components;
+    GetComponents<UStaticMeshComponent>(Components);
+
+    for (UStaticMeshComponent* Comp : Components)
+    {
+        if (Comp->GetName().Contains(TEXT("wheel")))
+        {
+            WheelMeshs.Add(Comp);
+        }
+    }
 }
 
 // Called every frame
-void ACarChaosCarPawn::Tick(float DeltaTime)
+void ACarChaosCarPawnPC::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
+    Super::Tick(DeltaTime);
 
-    if (IsGrounded()) 
+    if (IsGrounded())
     {
         //Sideways Grip
-        FVector Velocity = CarCollision->GetPhysicsLinearVelocity();
+        FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
 
-        FVector Forward = CarCollision->GetForwardVector();
-        FVector Right = CarCollision->GetRightVector();
+        FVector Forward = DirectionArrow->GetForwardVector();
+        FVector Right = DirectionArrow->GetRightVector();
 
         float ForwardSpeed = FVector::DotProduct(Velocity, Forward);
         float SidewaysSpeed = FVector::DotProduct(Velocity, Right);
@@ -40,29 +51,29 @@ void ACarChaosCarPawn::Tick(float DeltaTime)
 
         FVector NewVelocity = ForwardVelocity + (SidewaysVelocity * Grip);
 
-        CarCollision->SetPhysicsLinearVelocity(NewVelocity);
+        CarBodyMesh->SetPhysicsLinearVelocity(NewVelocity);
 
         //General Settings
-        CarCollision->SetLinearDamping(0.6f);
-        CarCollision->SetAngularDamping(8.f);
+        CarBodyMesh->SetLinearDamping(0.6f);
+        CarBodyMesh->SetAngularDamping(8.f);
     }
     else
     {
         //General Settings
-        CarCollision->SetLinearDamping(0.1f);
-        CarCollision->SetAngularDamping(20.f);
+        CarBodyMesh->SetLinearDamping(0.1f);
+        CarBodyMesh->SetAngularDamping(20.f);
     }
 
     //Downforce
-    FVector Velocity = CarCollision->GetPhysicsLinearVelocity();
+    FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
     float Speed = Velocity.Size();
 
     FVector Downforce = -FVector::UpVector * Speed * 2.5f;
 
-    CarCollision->AddForce(Downforce);
+    CarBodyMesh->AddForce(Downforce);
 
     //Stabilization trying to stay upright
-    FVector Up = CarCollision->GetUpVector();
+    FVector Up = DirectionArrow->GetUpVector();
     FVector WorldUp = FVector::UpVector;
 
     GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Up: x: %f y: %f z: %f"), Up.X, Up.Y, Up.Z));
@@ -72,20 +83,20 @@ void ACarChaosCarPawn::Tick(float DeltaTime)
     float UprightStrength = 50000000.f;
     FVector UprightTorque = TorqueAxis * UprightStrength;
 
-    CarCollision->AddTorqueInDegrees(UprightTorque);
+    CarBodyMesh->AddTorqueInDegrees(UprightTorque);
 }
 
-void ACarChaosCarPawn::UpdateGasBarValue()
+void ACarChaosCarPawnPC::UpdateGasBarValue()
 {
     CurrentGas = FMath::Clamp(CurrentGas - (GasUsage * (GetWorld()->GetDeltaSeconds())), 0.f, MaxGas);
 }
 
-void ACarChaosCarPawn::AddGas()
+void ACarChaosCarPawnPC::AddGas()
 {
-	CurrentGas = FMath::Clamp(CurrentGas + GasPickupValue, 0.f, MaxGas);
+    CurrentGas = FMath::Clamp(CurrentGas + GasPickupValue, 0.f, MaxGas);
 }
 
-bool ACarChaosCarPawn::IsGrounded()
+bool ACarChaosCarPawnPC::IsGrounded()
 {
     int GroundedWheels = 0;
     float TraceDistance = 30.f;
@@ -93,7 +104,7 @@ bool ACarChaosCarPawn::IsGrounded()
     FCollisionQueryParams Params;
     Params.AddIgnoredActor(this);
 
-    for (USphereComponent* Wheel : WheelCollisions)
+    for (UStaticMeshComponent* Wheel : WheelMeshs)
     {
         FVector Start = Wheel->GetComponentLocation();
         FVector End = Start - (FVector::UpVector * TraceDistance);
@@ -109,29 +120,29 @@ bool ACarChaosCarPawn::IsGrounded()
     return GroundedWheels >= 2;
 }
 
-void ACarChaosCarPawn::ChangeSpeed(float SpeedValue)
+void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
 {
     if (!IsGrounded()) return;
 
     float DeltaTime = GetWorld()->GetDeltaSeconds();
 
-    FVector Forward = CarCollision->GetForwardVector();
+    FVector Forward = DirectionArrow->GetForwardVector();
     FVector FlatForward = FVector::VectorPlaneProject(Forward, FVector::UpVector).GetSafeNormal();
 
     if (SpeedValue > 0)
     {
         FVector AccelerationForce = FlatForward * AccelerationPower;
-        CarCollision->AddForce(AccelerationForce);
+        CarBodyMesh->AddForce(AccelerationForce);
     }
     else if (SpeedValue < 0)
     {
         FVector BrakingForce = FlatForward * BrakingPower;
-        CarCollision->AddForce(BrakingForce);
+        CarBodyMesh->AddForce(BrakingForce);
 
-        FVector CurrentVelocity = CarCollision->GetPhysicsLinearVelocity();
+        FVector CurrentVelocity = CarBodyMesh->GetPhysicsLinearVelocity();
         if (CurrentVelocity.Size() < 5.f)
         {
-            CarCollision->SetPhysicsLinearVelocity(FVector::ZeroVector);
+            CarBodyMesh->SetPhysicsLinearVelocity(FVector::ZeroVector);
         }
     }
     else
@@ -139,8 +150,17 @@ void ACarChaosCarPawn::ChangeSpeed(float SpeedValue)
     }
 }
 
-void ACarChaosCarPawn::Steer(float SteeringValue)
+void ACarChaosCarPawnPC::Steer(float SteeringValue)
 {
+    FVector Forward = DirectionArrow->GetForwardVector();
+    FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
+    float ForwardSpeed = FVector::DotProduct(Velocity, Forward);
+
+    if (ForwardSpeed < 0.f)
+    {
+        SteeringValue = -SteeringValue;
+    }
+
     float DeltaTime = GetWorld()->GetDeltaSeconds();
 
     // Smooth steering input
@@ -154,6 +174,6 @@ void ACarChaosCarPawn::Steer(float SteeringValue)
     float TurnTorque = CurrentSteering * SteeringStrength;
 
     FVector Torque(0.f, 0.f, TurnTorque);
-    CarCollision->AddTorqueInDegrees(Torque);
+    CarBodyMesh->AddTorqueInDegrees(Torque);
 }
 
