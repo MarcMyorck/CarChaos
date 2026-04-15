@@ -20,6 +20,17 @@ public:
 	// Sets default values for this pawn's properties
 	ACarChaosCarPawnPC();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rounds")
+	int RoundsDone = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rounds")
+	int CurrentCheckpoint = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rounds")
+	int MaxCheckpoints = 31;
+
+	void UpdateCheckpoint(int CheckpointNumber);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
 	float MaxGas = 100.f;
 
@@ -27,14 +38,29 @@ public:
 	float CurrentGas = 100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
-	float GasUsage = 5.f;
+	float GasUsage = 3.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
-	float GasPickupValue = 30.f;
+	float GasPickupValue = 25.f;
 
 	void UpdateGasBarValue();
 
 	void AddGas();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
+	float TimeLimit = 180.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
+	float TimeRemaining = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float CurrentPoints = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float PointsPerSecond = 50.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float PointsPerPickup = 250.f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Car")
 	UStaticMeshComponent* CarBodyMesh;
@@ -46,16 +72,16 @@ public:
 	TArray<UStaticMeshComponent*> WheelMeshs;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float AccelerationPower = 3000.f;
+	float AccelerationPower = 350000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float BrakingPower = -4000.f;
+	float BrakingPower = -250000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float Grip = 0.2f;
+	float Grip = 0.3f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float SteeringStrength = 10000.f;
+	float SteeringStrength = 800000000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float CurrentSteering = 0.f;

@@ -13,6 +13,8 @@ void ACarChaosPlayerController::BeginPlay()
 
     PlayerCarPawn = Cast<ACarChaosCarPawnPC>(GetPawn());
     UpdateGasBarVisuals();
+    UpdateTimeLimitVisuals();
+    UpdatePointsVisuals();
 
     ULocalPlayer* LocalPlayer = GetLocalPlayer();
     UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -25,6 +27,8 @@ void ACarChaosPlayerController::Tick(float DeltaTime)
 
     PlayerCarPawn->UpdateGasBarValue();
     UpdateGasBarVisuals();
+    UpdateTimeLimitVisuals();
+    UpdatePointsVisuals();
 }
 
 void ACarChaosPlayerController::SetupInputComponent()
@@ -56,5 +60,23 @@ void ACarChaosPlayerController::UpdateGasBarVisuals()
         MainHUDWidget->GasBarWidget->CurrentGas = PlayerCarPawn->CurrentGas;
         MainHUDWidget->GasBarWidget->MaxGas = PlayerCarPawn->MaxGas;
         MainHUDWidget->GasBarWidget->UpdateGasBar();
+    }
+}
+
+void ACarChaosPlayerController::UpdateTimeLimitVisuals()
+{
+    if (MainHUDWidget && MainHUDWidget->TimeLimitWidget)
+    {
+        MainHUDWidget->TimeLimitWidget->TimeRemaining = PlayerCarPawn->TimeRemaining;
+        MainHUDWidget->TimeLimitWidget->UpdateTimeLimit();
+    }
+}
+
+void ACarChaosPlayerController::UpdatePointsVisuals()
+{
+    if (MainHUDWidget && MainHUDWidget->PointsWidget)
+    {
+        MainHUDWidget->PointsWidget->CurrentPoints = PlayerCarPawn->CurrentPoints;
+        MainHUDWidget->PointsWidget->UpdatePoints();
     }
 }

@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "GasBarWidget.h"
+#include "TimeLimitWidget.h"
+#include "PointsWidget.h"
 #include "MainHUDWidget.generated.h"
 
 UCLASS()
@@ -16,4 +18,10 @@ public:
 
     UPROPERTY(meta = (BindWidget))
     UGasBarWidget* GasBarWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    UTimeLimitWidget* TimeLimitWidget;
+
+    UPROPERTY(meta = (BindWidget))
+    UPointsWidget* PointsWidget;
 };

@@ -52,23 +52,29 @@ void AGasPickup::OnOverlap(
     const FHitResult& SweepResult)
 {
     if (!OtherActor || OtherActor == this) return;
+    if (!PlayerClass || !EnemyClass) return;
 
-    ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-    if (PC)
+    if (OtherActor->IsA(PlayerClass) || OtherActor->IsA(EnemyClass))
     {
-         PC->AddGas();
+        if (OtherActor->IsA(PlayerClass)) {
+            ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+            if (PC)
+            {
+                PC->AddGas();
+            }
+        }
+
+        SetActorHiddenInGame(true);
+        SetActorEnableCollision(false);
+
+        GetWorldTimerManager().SetTimer(
+            RespawnTimer,
+            this,
+            &AGasPickup::RespawnPickup,
+            RespawnTime,
+            false
+        );
     }
-
-    SetActorHiddenInGame(true);
-    SetActorEnableCollision(false);
-
-    GetWorldTimerManager().SetTimer(
-        RespawnTimer,
-        this,
-        &AGasPickup::RespawnPickup,
-        RespawnTime,
-        false
-    );
 }
 
 void AGasPickup::RespawnPickup()

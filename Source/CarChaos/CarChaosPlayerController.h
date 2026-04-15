@@ -35,6 +35,10 @@ protected:
 
     void UpdateGasBarVisuals();
 
+    void UpdateTimeLimitVisuals();
+
+    void UpdatePointsVisuals();
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputMappingContext* InputMappingContext;
 

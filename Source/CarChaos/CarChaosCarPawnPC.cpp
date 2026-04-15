@@ -28,6 +28,8 @@ void ACarChaosCarPawnPC::BeginPlay()
             WheelMeshs.Add(Comp);
         }
     }
+
+    TimeRemaining = TimeLimit;
 }
 
 // Called every frame
@@ -76,7 +78,7 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
     FVector Up = DirectionArrow->GetUpVector();
     FVector WorldUp = FVector::UpVector;
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Up: x: %f y: %f z: %f"), Up.X, Up.Y, Up.Z));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Up: x: %f y: %f z: %f"), Up.X, Up.Y, Up.Z));
 
     FVector TorqueAxis = FVector::CrossProduct(Up, WorldUp);
 
@@ -84,6 +86,46 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
     FVector UprightTorque = TorqueAxis * UprightStrength;
 
     CarBodyMesh->AddTorqueInDegrees(UprightTorque);
+
+    //Points
+    CurrentPoints += (PointsPerSecond * DeltaTime);
+
+    //Time and Gas check
+    TimeRemaining = FMath::Clamp(TimeRemaining - DeltaTime, 0.f, TimeLimit);
+
+    if (TimeRemaining <= 0.f || CurrentGas <= 0.f)
+    {   
+        //Game Over
+    }
+}
+
+void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
+{
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+        FString::Printf(TEXT("Current Round %d"), RoundsDone));
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+        FString::Printf(TEXT("Current Checkpoint number %d"), CurrentCheckpoint));
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+        FString::Printf(TEXT("Checkpoint passed with number %d"), CheckpointNumber));
+
+    if (CheckpointNumber > CurrentCheckpoint && CheckpointNumber - CurrentCheckpoint <= 2) {
+        CurrentCheckpoint = CheckpointNumber;
+    }
+    else if (CheckpointNumber == 1 && (CurrentCheckpoint == MaxCheckpoints || CurrentCheckpoint == MaxCheckpoints - 1))
+    {
+        RoundsDone++;
+        CurrentCheckpoint = 1;
+    }
+
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+        FString::Printf(TEXT("New Round %d"), RoundsDone));
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
+        FString::Printf(TEXT("New Checkpoint number %d"), CurrentCheckpoint));
+
+    if (RoundsDone == 3) 
+    {
+        //Finish Race
+    }
 }
 
 void ACarChaosCarPawnPC::UpdateGasBarValue()
@@ -94,6 +136,7 @@ void ACarChaosCarPawnPC::UpdateGasBarValue()
 void ACarChaosCarPawnPC::AddGas()
 {
     CurrentGas = FMath::Clamp(CurrentGas + GasPickupValue, 0.f, MaxGas);
+    CurrentPoints += PointsPerPickup;
 }
 
 bool ACarChaosCarPawnPC::IsGrounded()
@@ -115,7 +158,7 @@ bool ACarChaosCarPawnPC::IsGrounded()
         }
     }
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Up: x: %d"), GroundedWheels));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Up: x: %d"), GroundedWheels));
 
     return GroundedWheels >= 2;
 }

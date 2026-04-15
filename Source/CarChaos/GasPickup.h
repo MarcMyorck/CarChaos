@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "CarChaosCarPawnPC.h"
 #include "GasPickup.generated.h"
 
 UCLASS()
@@ -32,6 +33,12 @@ protected:
     float RespawnTime = 5.f;
 
     FTimerHandle RespawnTimer;
+
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<ACarChaosCarPawnPC> PlayerClass;
+
+    UPROPERTY(EditAnywhere) //Change when enemy exists
+    TSubclassOf<ACarChaosCarPawnPC> EnemyClass;
 
     UFUNCTION()
     void OnOverlap(
