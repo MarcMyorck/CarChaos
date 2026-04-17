@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "CarChaosRacingGameState.h"
 #include "CarChaosCarPawnPC.h"
 
 // Sets default values
@@ -30,6 +31,8 @@ void ACarChaosCarPawnPC::BeginPlay()
     }
 
     TimeRemaining = TimeLimit;
+
+    GameState = GetWorld() ? GetWorld()->GetGameState<ACarChaosRacingGameState>() : nullptr;
 }
 
 // Called every frame
@@ -87,6 +90,12 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
     CarBodyMesh->AddTorqueInDegrees(UprightTorque);
 
+    //Only update points and time if pawn is player. Enemies dont need that for now. Other functions wont be executed if its an enemy. 
+    if (!IsPlayer) return;
+
+    //Gas
+    UpdateGasBarValue();
+
     //Points
     CurrentPoints += (PointsPerSecond * DeltaTime);
 
@@ -95,18 +104,15 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
     if (TimeRemaining <= 0.f || CurrentGas <= 0.f)
     {   
-        //Game Over
+        GameState->LoseRace();
     }
 }
 
 void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
 {
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-        FString::Printf(TEXT("Current Round %d"), RoundsDone));
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-        FString::Printf(TEXT("Current Checkpoint number %d"), CurrentCheckpoint));
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-        FString::Printf(TEXT("Checkpoint passed with number %d"), CheckpointNumber));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Current Round %d"), RoundsDone));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Current Checkpoint number %d"), CurrentCheckpoint));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Checkpoint passed with number %d"), CheckpointNumber));
 
     if (CheckpointNumber > CurrentCheckpoint && CheckpointNumber - CurrentCheckpoint <= 2) {
         CurrentCheckpoint = CheckpointNumber;
@@ -117,14 +123,12 @@ void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
         CurrentCheckpoint = 1;
     }
 
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-        FString::Printf(TEXT("New Round %d"), RoundsDone));
-    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green,
-        FString::Printf(TEXT("New Checkpoint number %d"), CurrentCheckpoint));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("New Round %d"), RoundsDone));
+    //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("New Checkpoint number %d"), CurrentCheckpoint));
 
     if (RoundsDone == 3) 
     {
-        //Finish Race
+        GameState->FinishRace();
     }
 }
 

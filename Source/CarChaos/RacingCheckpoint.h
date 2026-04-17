@@ -5,8 +5,9 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
-#include "CarChaosCarPawnPC.h"
 #include "RacingCheckpoint.generated.h"
+
+class ACarChaosCarPawnPC;
 
 UCLASS()
 class CARCHAOS_API ARacingCheckpoint : public AActor

@@ -12,6 +12,7 @@ void ACarChaosPlayerController::BeginPlay()
     MainHUDWidget->AddToViewport();
 
     PlayerCarPawn = Cast<ACarChaosCarPawnPC>(GetPawn());
+    PlayerCarPawn->IsPlayer = true;
     UpdateGasBarVisuals();
     UpdateTimeLimitVisuals();
     UpdatePointsVisuals();
@@ -25,7 +26,6 @@ void ACarChaosPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    PlayerCarPawn->UpdateGasBarValue();
     UpdateGasBarVisuals();
     UpdateTimeLimitVisuals();
     UpdatePointsVisuals();

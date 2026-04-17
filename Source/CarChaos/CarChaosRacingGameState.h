@@ -1,0 +1,40 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/GameStateBase.h"
+#include "CarChaosRacingGameState.generated.h"
+
+class ACarChaosCarPawnPC;
+class ARacingCheckpoint;
+
+/**
+ * 
+ */
+UCLASS()
+class CARCHAOS_API ACarChaosRacingGameState : public AGameStateBase
+{
+	GENERATED_BODY()
+	
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Checkpoints")
+	TArray<ARacingCheckpoint*> Checkpoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cars")
+	TArray<ACarChaosCarPawnPC*> Cars;
+
+	void UpdateCarRanking();
+
+	void FinishRace();
+
+	void LoseRace();
+
+	virtual void Tick(float DeltaTime) override;
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+};

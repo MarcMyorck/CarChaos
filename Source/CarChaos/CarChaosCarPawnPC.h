@@ -11,6 +11,8 @@
 #include "Components/ArrowComponent.h"
 #include "CarChaosCarPawnPC.generated.h"
 
+class ACarChaosRacingGameState;
+
 UCLASS()
 class CARCHAOS_API ACarChaosCarPawnPC : public APawn
 {
@@ -20,14 +22,23 @@ public:
 	// Sets default values for this pawn's properties
 	ACarChaosCarPawnPC();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rounds")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState")
+	ACarChaosRacingGameState* GameState;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player/Enemy")
+	bool IsPlayer = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
 	int RoundsDone = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rounds")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
 	int CurrentCheckpoint = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rounds")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
 	int MaxCheckpoints = 31;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
+	int CurrentPosition = 0;
 
 	void UpdateCheckpoint(int CheckpointNumber);
 
