@@ -39,6 +39,10 @@ protected:
 
     void UpdatePointsVisuals();
 
+    void UpdatePositionVisuals();
+
+    void UpdateLapVisuals();
+
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputMappingContext* InputMappingContext;
 

@@ -146,6 +146,7 @@ void ACarChaosCarPawnPC::AddGas()
 bool ACarChaosCarPawnPC::IsGrounded()
 {
     int GroundedWheels = 0;
+    int OffroadWheels = 0;
     float TraceDistance = 30.f;
     FHitResult Hit;
     FCollisionQueryParams Params;
@@ -159,7 +160,23 @@ bool ACarChaosCarPawnPC::IsGrounded()
         if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params))
         {
             GroundedWheels++;
+
+            //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Hit.GetActor()->GetActorLabel());
+
+            if (Hit.GetActor()->GetActorLabel().Contains(TEXT("grass")) || Hit.GetActor()->GetActorLabel().Contains(TEXT("Sand")))
+            {
+                OffroadWheels++;
+            }
         }
+    }
+
+    if (GroundedWheels == 0 || OffroadWheels == 0)
+    {
+        CurrentOffroadValue = 0.f;
+    }
+    else
+    {
+        CurrentOffroadValue = (float) OffroadWheels / (float) GroundedWheels;
     }
 
     //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Up: x: %d"), GroundedWheels));
@@ -178,22 +195,21 @@ void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
 
     if (SpeedValue > 0)
     {
-        FVector AccelerationForce = FlatForward * AccelerationPower;
+        FVector AccelerationForce = FlatForward * (AccelerationPower * (1 - (OffroadPenalty * CurrentOffroadValue)));
         CarBodyMesh->AddForce(AccelerationForce);
     }
     else if (SpeedValue < 0)
     {
-        FVector BrakingForce = FlatForward * BrakingPower;
+        FVector BrakingForce = FlatForward * (BrakingPower * (1 - (OffroadPenalty * CurrentOffroadValue)));
         CarBodyMesh->AddForce(BrakingForce);
-
+    }
+    else
+    {
         FVector CurrentVelocity = CarBodyMesh->GetPhysicsLinearVelocity();
         if (CurrentVelocity.Size() < 5.f)
         {
             CarBodyMesh->SetPhysicsLinearVelocity(FVector::ZeroVector);
         }
-    }
-    else
-    {
     }
 }
 

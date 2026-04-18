@@ -20,11 +20,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Checkpoint Number")
 	int CheckpointNumber = -1;
 
-protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(BlueprintReadOnly, Category = "Collision")
 	UBoxComponent* Collision;
+
+protected:
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<ACarChaosCarPawnPC> PlayerClass;

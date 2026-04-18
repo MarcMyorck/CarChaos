@@ -16,6 +16,8 @@ void ACarChaosPlayerController::BeginPlay()
     UpdateGasBarVisuals();
     UpdateTimeLimitVisuals();
     UpdatePointsVisuals();
+    UpdatePositionVisuals();
+    UpdateLapVisuals();
 
     ULocalPlayer* LocalPlayer = GetLocalPlayer();
     UEnhancedInputLocalPlayerSubsystem* Subsystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
@@ -29,6 +31,8 @@ void ACarChaosPlayerController::Tick(float DeltaTime)
     UpdateGasBarVisuals();
     UpdateTimeLimitVisuals();
     UpdatePointsVisuals();
+    UpdatePositionVisuals();
+    UpdateLapVisuals();
 }
 
 void ACarChaosPlayerController::SetupInputComponent()
@@ -55,28 +59,46 @@ void ACarChaosPlayerController::AddGas()
 
 void ACarChaosPlayerController::UpdateGasBarVisuals()
 {
-    if (MainHUDWidget && MainHUDWidget->GasBarWidget)
+    if (MainHUDWidget)
     {
-        MainHUDWidget->GasBarWidget->CurrentGas = PlayerCarPawn->CurrentGas;
-        MainHUDWidget->GasBarWidget->MaxGas = PlayerCarPawn->MaxGas;
-        MainHUDWidget->GasBarWidget->UpdateGasBar();
+        MainHUDWidget->CurrentGas = PlayerCarPawn->CurrentGas;
+        MainHUDWidget->MaxGas = PlayerCarPawn->MaxGas;
+        MainHUDWidget->UpdateGasBar();
     }
 }
 
 void ACarChaosPlayerController::UpdateTimeLimitVisuals()
 {
-    if (MainHUDWidget && MainHUDWidget->TimeLimitWidget)
+    if (MainHUDWidget)
     {
-        MainHUDWidget->TimeLimitWidget->TimeRemaining = PlayerCarPawn->TimeRemaining;
-        MainHUDWidget->TimeLimitWidget->UpdateTimeLimit();
+        MainHUDWidget->TimeRemaining = PlayerCarPawn->TimeRemaining;
+        MainHUDWidget->UpdateTimeLimit();
     }
 }
 
 void ACarChaosPlayerController::UpdatePointsVisuals()
 {
-    if (MainHUDWidget && MainHUDWidget->PointsWidget)
+    if (MainHUDWidget)
     {
-        MainHUDWidget->PointsWidget->CurrentPoints = PlayerCarPawn->CurrentPoints;
-        MainHUDWidget->PointsWidget->UpdatePoints();
+        MainHUDWidget->CurrentPoints = PlayerCarPawn->CurrentPoints;
+        MainHUDWidget->UpdatePoints();
+    }
+}
+
+void ACarChaosPlayerController::UpdatePositionVisuals()
+{
+    if (MainHUDWidget)
+    {
+        MainHUDWidget->CurrentPosition = PlayerCarPawn->CurrentPosition;
+        MainHUDWidget->UpdatePosition();
+    }
+}
+
+void ACarChaosPlayerController::UpdateLapVisuals()
+{
+    if (MainHUDWidget)
+    {
+        MainHUDWidget->CurrentLap = PlayerCarPawn->RoundsDone + 1;
+        MainHUDWidget->UpdateLap();
     }
 }

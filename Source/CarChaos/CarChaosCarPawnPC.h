@@ -97,6 +97,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float CurrentSteering = 0.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float OffroadPenalty = 0.60f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float CurrentOffroadValue = 0.f;
+
 	bool IsGrounded();
 
 	void ChangeSpeed(float SpeedValue);

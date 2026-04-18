@@ -6,32 +6,31 @@
 #include "RacingCheckpoint.h"
 #include "CarChaosRacingGameState.h"
 
+ACarChaosRacingGameState::ACarChaosRacingGameState()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 void ACarChaosRacingGameState::BeginPlay()
 {
 	Super::BeginPlay();
-	PrimaryActorTick.bCanEverTick = true;
 
 	//Set up Checkpoints in Array
 	TArray<AActor*> FoundActorsCheckpoints;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARacingCheckpoint::StaticClass(), FoundActorsCheckpoints);
 
-	for (AActor* Actor : FoundActorsCheckpoints)
+	for (AActor* Checkpoint : FoundActorsCheckpoints)
 	{
-		Checkpoints.Add(Cast<ARacingCheckpoint>(Actor));
+		Checkpoints.Add(Cast<ARacingCheckpoint>(Checkpoint));
 	}
-
-	Checkpoints.Sort([](const ARacingCheckpoint& A, const ARacingCheckpoint& B)
-	{
-		return A.CheckpointNumber < B.CheckpointNumber;
-	});
 
 	//Set up Cars in Array
 	TArray<AActor*> FoundActorsCars;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACarChaosCarPawnPC::StaticClass(), FoundActorsCars);
 
-	for (AActor* Actor : FoundActorsCars)
+	for (AActor* Car : FoundActorsCars)
 	{
-		Cars.Add(Cast<ACarChaosCarPawnPC>(Actor));
+		Cars.Add(Cast<ACarChaosCarPawnPC>(Car));
 	}
 }
 
@@ -39,7 +38,28 @@ void ACarChaosRacingGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	UE_LOG(LogTemp, Verbose, TEXT("GameState Tick"));
+
+	if (!IsCheckpointsSorted) 
+	{
+		SortCheckpoints();
+	}
+
 	UpdateCarRanking();
+}
+
+void ACarChaosRacingGameState::SortCheckpoints()
+{
+	Checkpoints.Sort([](const ARacingCheckpoint& A, const ARacingCheckpoint& B)
+	{
+		return A.CheckpointNumber < B.CheckpointNumber;
+	});
+
+	//Check first three to see if it seems to be correctly sorted
+	if (Checkpoints[0]->CheckpointNumber == 1 && Checkpoints[1]->CheckpointNumber == 2 && Checkpoints[2]->CheckpointNumber == 3)
+	{
+		IsCheckpointsSorted = true;
+	}
 }
 
 void ACarChaosRacingGameState::UpdateCarRanking() 
@@ -56,25 +76,29 @@ void ACarChaosRacingGameState::UpdateCarRanking()
 				return A.CurrentCheckpoint > B.CurrentCheckpoint; // further checkpoint first
 			}
 
+			//Check which car is closer to next checkpoint
+			UBoxComponent* CheckpointCollision;
+
 			if (Checkpoints.IsValidIndex(A.CurrentCheckpoint))
 			{
-				const FVector NextCheckpointLocation = Checkpoints[A.CurrentCheckpoint]->GetActorLocation();
-
-				const float DistA = FVector::Dist(A.GetActorLocation(), NextCheckpointLocation);
-				const float DistB = FVector::Dist(B.GetActorLocation(), NextCheckpointLocation);
-
-				return DistA < DistB; // closer to next checkpoint ranks higher
+				CheckpointCollision = Checkpoints[A.CurrentCheckpoint]->Collision;
 			}
 			else
 			{
 				//Next checkpoint is finish line so first again
-				const FVector NextCheckpointLocation = Checkpoints[0]->GetActorLocation();
-
-				const float DistA = FVector::Dist(A.GetActorLocation(), NextCheckpointLocation);
-				const float DistB = FVector::Dist(B.GetActorLocation(), NextCheckpointLocation);
-
-				return DistA < DistB; // closer to next checkpoint ranks higher
+				CheckpointCollision = Checkpoints[0]->Collision;
 			}
+
+			FVector ClosestA;
+			CheckpointCollision->GetClosestPointOnCollision(A.CarBodyMesh->GetComponentLocation(), ClosestA);
+
+			FVector ClosestB;
+			CheckpointCollision->GetClosestPointOnCollision(B.CarBodyMesh->GetComponentLocation(), ClosestB);
+
+			const float DistA = FVector::Dist(A.CarBodyMesh->GetComponentLocation(), ClosestA);
+			const float DistB = FVector::Dist(B.CarBodyMesh->GetComponentLocation(), ClosestB);
+
+			return DistA < DistB; // closer to next checkpoint ranks higher
 		});
 
 	for (int32 i = 0; i < Cars.Num(); ++i)

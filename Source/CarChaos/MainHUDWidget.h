@@ -4,9 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "GasBarWidget.h"
-#include "TimeLimitWidget.h"
-#include "PointsWidget.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
 #include "MainHUDWidget.generated.h"
 
 UCLASS()
@@ -17,11 +16,50 @@ class CARCHAOS_API UMainHUDWidget : public UUserWidget
 public:
 
     UPROPERTY(meta = (BindWidget))
-    UGasBarWidget* GasBarWidget;
+    UProgressBar* GasBar;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
+    float MaxGas = 100.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
+    float CurrentGas = 100.f;
+
+    UFUNCTION(BlueprintCallable, Category = "Gas")
+    void UpdateGasBar();
 
     UPROPERTY(meta = (BindWidget))
-    UTimeLimitWidget* TimeLimitWidget;
+    UTextBlock* TimeTextBlock;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time")
+    float TimeRemaining = 0.f;
+
+    UFUNCTION(BlueprintCallable, Category = "Time")
+    void UpdateTimeLimit();
 
     UPROPERTY(meta = (BindWidget))
-    UPointsWidget* PointsWidget;
+    UTextBlock* PointsTextBlock;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+    float CurrentPoints = 0.f;
+
+    UFUNCTION(BlueprintCallable, Category = "Points")
+    void UpdatePoints();
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PositionTextBlock;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
+    int CurrentPosition = 0;
+
+    UFUNCTION(BlueprintCallable, Category = "Position")
+    void UpdatePosition();
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* LapTextBlock;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lap")
+    int CurrentLap = 0;
+
+    UFUNCTION(BlueprintCallable, Category = "Lap")
+    void UpdateLap();
 };

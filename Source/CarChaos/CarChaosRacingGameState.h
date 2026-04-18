@@ -18,9 +18,15 @@ class CARCHAOS_API ACarChaosRacingGameState : public AGameStateBase
 	GENERATED_BODY()
 	
 public:
+	ACarChaosRacingGameState();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Checkpoints")
 	TArray<ARacingCheckpoint*> Checkpoints;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Checkpoints")
+	bool IsCheckpointsSorted = false;
+
+	void SortCheckpoints();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cars")
 	TArray<ACarChaosCarPawnPC*> Cars;
