@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SplineComponent.h"
 #include "GameFramework/GameStateBase.h"
 #include "CarChaosRacingGameState.generated.h"
 
@@ -30,6 +31,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Cars")
 	TArray<ACarChaosCarPawnPC*> Cars;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Splines")
+	TArray<USplineComponent*> RacingSplines;
 
 	void UpdateCarRanking();
 

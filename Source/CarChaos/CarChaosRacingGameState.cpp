@@ -24,13 +24,33 @@ void ACarChaosRacingGameState::BeginPlay()
 		Checkpoints.Add(Cast<ARacingCheckpoint>(Checkpoint));
 	}
 
+	//Set up Splines in Array
+	TArray<AActor*> FoundActorsSplines;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActorsSplines);
+
+	for (AActor* Actor : FoundActorsSplines)
+	{
+		if (Actor->GetActorLabel().Contains("BP_RacingSpline"))
+		{
+			TArray<USplineComponent*> SplineMeshes;
+			Actor->GetComponents<USplineComponent>(SplineMeshes);
+
+			for (USplineComponent* Comp : SplineMeshes)
+			{
+				RacingSplines.Add(Comp);
+			}
+		}
+	}
+
 	//Set up Cars in Array
 	TArray<AActor*> FoundActorsCars;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACarChaosCarPawnPC::StaticClass(), FoundActorsCars);
 
 	for (AActor* Car : FoundActorsCars)
 	{
-		Cars.Add(Cast<ACarChaosCarPawnPC>(Car));
+		ACarChaosCarPawnPC* TempCar = Cast<ACarChaosCarPawnPC>(Car);
+		TempCar->RacingSpline = RacingSplines[FMath::RandRange(0, RacingSplines.Num() - 1)];
+		Cars.Add(TempCar);
 	}
 }
 
@@ -59,6 +79,15 @@ void ACarChaosRacingGameState::SortCheckpoints()
 	if (Checkpoints[0]->CheckpointNumber == 1 && Checkpoints[1]->CheckpointNumber == 2 && Checkpoints[2]->CheckpointNumber == 3)
 	{
 		IsCheckpointsSorted = true;
+
+		for (int32 i = 0; i < Cars.Num(); ++i)
+		{
+			ACarChaosCarPawnPC* Car = Cars[i];
+			if (Car)
+			{
+				Car->NextCheckpointObject = Checkpoints[0];
+			}
+		}
 	}
 }
 

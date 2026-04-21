@@ -2,6 +2,7 @@
 
 
 #include "CarChaosRacingGameState.h"
+#include "RacingCheckpoint.h"
 #include "CarChaosCarPawnPC.h"
 
 // Sets default values
@@ -90,21 +91,80 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
     CarBodyMesh->AddTorqueInDegrees(UprightTorque);
 
-    //Only update points and time if pawn is player. Enemies dont need that for now. Other functions wont be executed if its an enemy. 
-    if (!IsPlayer) return;
+    if (IsPlayer)
+    {
+        //Only update points and time if pawn is player. Enemies dont need that for now. Other functions wont be executed if its an enemy. 
+        //Gas
+        UpdateGasBarValue();
 
-    //Gas
-    UpdateGasBarValue();
+        //Points
+        CurrentPoints += (PointsPerSecond * DeltaTime);
 
-    //Points
-    CurrentPoints += (PointsPerSecond * DeltaTime);
+        //Time and Gas check
+        TimeRemaining = FMath::Clamp(TimeRemaining - DeltaTime, 0.f, TimeLimit);
 
-    //Time and Gas check
-    TimeRemaining = FMath::Clamp(TimeRemaining - DeltaTime, 0.f, TimeLimit);
+        if (TimeRemaining <= 0.f || CurrentGas <= 0.f)
+        {
+            GameState->LoseRace();
+        }
+    }
+    else
+    {
+        //Only do AI navigation on enemies
+        int AIVersion = 2;
+        if (AIVersion == 1)
+        {
+            FVector TargetLocation = NextCheckpointObject->GetActorLocation();
 
-    if (TimeRemaining <= 0.f || CurrentGas <= 0.f)
-    {   
-        GameState->LoseRace();
+            FVector ToTarget = (TargetLocation - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
+            FVector Forward = DirectionArrow->GetForwardVector();
+            float SteeringInput = FVector::CrossProduct(Forward, ToTarget).Z;
+            Steer(SteeringInput * 2.f);
+
+            float Alignment = FVector::DotProduct(Forward, ToTarget);
+            float SpeedInput = 0.f;
+            if (Alignment > 0.7f)
+            {
+                SpeedInput = 0.7f; // full throttle
+            }
+            else if (Alignment > 0.3f)
+            {
+                SpeedInput = 0.35f; // slow down for turn
+            }
+            else
+            {
+                SpeedInput = 0.f; // too sharp, stop accelerating
+            }
+            ChangeSpeed(SpeedInput);
+        }
+        else if (AIVersion == 2)
+        {
+            if (!RacingSpline) return;
+
+            float ClosestKey = RacingSpline->FindInputKeyClosestToWorldLocation(CarBodyMesh->GetComponentLocation());
+            CurrentSplineDistance = RacingSpline->GetDistanceAlongSplineAtSplineInputKey(ClosestKey);
+
+            float TargetDistance = CurrentSplineDistance + LookAheadDistance;
+            FVector TargetLocation = RacingSpline->GetLocationAtDistanceAlongSpline(TargetDistance, ESplineCoordinateSpace::World);
+
+            FVector Forward = DirectionArrow->GetForwardVector();
+            FVector ToTarget = (TargetLocation - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
+
+            float SteeringInput = FVector::CrossProduct(Forward, ToTarget).Z;
+            SteeringInput = FMath::Clamp(SteeringInput, -1.f, 1.f);
+            Steer(SteeringInput);
+
+            FVector NearPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + 300.f, ESplineCoordinateSpace::World);
+            FVector FarPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + 1000.f, ESplineCoordinateSpace::World);
+
+            FVector Dir1 = (NearPoint - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
+            FVector Dir2 = (FarPoint - NearPoint).GetSafeNormal();
+
+            float CurveFactor = FVector::DotProduct(Dir1, Dir2);
+
+            float SpeedInput = FMath::Clamp(CurveFactor, 0.3f, 1.f);
+            ChangeSpeed(SpeedInput);
+        }
     }
 }
 
@@ -116,11 +176,20 @@ void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
 
     if (CheckpointNumber > CurrentCheckpoint && CheckpointNumber - CurrentCheckpoint <= 2) {
         CurrentCheckpoint = CheckpointNumber;
+        if (CurrentCheckpoint == MaxCheckpoints)
+        {
+            NextCheckpointObject = GameState->Checkpoints[0];
+        }
+        else
+        {
+            NextCheckpointObject = GameState->Checkpoints[CurrentCheckpoint];
+        }
     }
     else if (CheckpointNumber == 1 && (CurrentCheckpoint == MaxCheckpoints || CurrentCheckpoint == MaxCheckpoints - 1))
     {
         RoundsDone++;
         CurrentCheckpoint = 1;
+        NextCheckpointObject = GameState->Checkpoints[CurrentCheckpoint];
     }
 
     //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("New Round %d"), RoundsDone));
@@ -196,12 +265,12 @@ void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
     if (SpeedValue > 0)
     {
         FVector AccelerationForce = FlatForward * (AccelerationPower * (1 - (OffroadPenalty * CurrentOffroadValue)));
-        CarBodyMesh->AddForce(AccelerationForce);
+        CarBodyMesh->AddForce(AccelerationForce * SpeedValue);
     }
     else if (SpeedValue < 0)
     {
         FVector BrakingForce = FlatForward * (BrakingPower * (1 - (OffroadPenalty * CurrentOffroadValue)));
-        CarBodyMesh->AddForce(BrakingForce);
+        CarBodyMesh->AddForce(BrakingForce * -SpeedValue);
     }
     else
     {

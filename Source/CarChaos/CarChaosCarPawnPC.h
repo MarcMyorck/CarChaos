@@ -9,9 +9,11 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/ArrowComponent.h"
+#include "Components/SplineComponent.h"
 #include "CarChaosCarPawnPC.generated.h"
 
 class ACarChaosRacingGameState;
+class ARacingCheckpoint;
 
 UCLASS()
 class CARCHAOS_API ACarChaosCarPawnPC : public APawn
@@ -41,6 +43,18 @@ public:
 	int CurrentPosition = 0;
 
 	void UpdateCheckpoint(int CheckpointNumber);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
+	ARacingCheckpoint* NextCheckpointObject;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
+	USplineComponent* RacingSpline;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
+	float CurrentSplineDistance = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
+	float LookAheadDistance = 800.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
 	float MaxGas = 100.f;
