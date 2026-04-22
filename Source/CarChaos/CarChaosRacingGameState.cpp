@@ -4,6 +4,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "CarChaosCarPawnPC.h"
 #include "RacingCheckpoint.h"
+#include "CarChaosPlayerController.h"
+#include "MainHUDWidget.h"
 #include "CarChaosRacingGameState.h"
 
 ACarChaosRacingGameState::ACarChaosRacingGameState()
@@ -143,9 +145,19 @@ void ACarChaosRacingGameState::UpdateCarRanking()
 void ACarChaosRacingGameState::FinishRace()
 {
 	//When player finishes all rounds successfully
+	ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (PC)
+	{
+		PC->MainHUDWidget->DisplayResult(true);
+	}
 }
 
 void ACarChaosRacingGameState::LoseRace()
 {
 	//When player runs out of time or gas
+	ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (PC)
+	{
+		PC->MainHUDWidget->DisplayResult(false);
+	}
 }

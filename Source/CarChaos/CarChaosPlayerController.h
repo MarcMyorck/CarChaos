@@ -29,6 +29,9 @@ public:
 
     void AddGas();
 
+    UPROPERTY()
+    UMainHUDWidget* MainHUDWidget;
+
 protected:
 
     virtual void BeginPlay() override;
@@ -56,8 +59,5 @@ private:
 
     UPROPERTY()
     ACarChaosCarPawnPC* PlayerCarPawn;
-
-    UPROPERTY()
-    UMainHUDWidget* MainHUDWidget;
 
 };

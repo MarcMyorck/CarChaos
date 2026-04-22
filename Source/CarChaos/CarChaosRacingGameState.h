@@ -9,6 +9,8 @@
 
 class ACarChaosCarPawnPC;
 class ARacingCheckpoint;
+class ACarChaosPlayerController;
+class UMainHUDWidget;
 
 /**
  * 

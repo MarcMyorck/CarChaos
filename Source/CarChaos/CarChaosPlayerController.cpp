@@ -8,6 +8,10 @@ void ACarChaosPlayerController::BeginPlay()
     Super::BeginPlay();
     PrimaryActorTick.bCanEverTick = true;
 
+    FInputModeGameOnly InputModeGame;
+    SetInputMode(InputModeGame);
+    bShowMouseCursor = false;
+
     MainHUDWidget = CreateWidget<UMainHUDWidget>(this, MainHUDWidgetClass);
     MainHUDWidget->AddToViewport();
 
@@ -28,11 +32,14 @@ void ACarChaosPlayerController::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    UpdateGasBarVisuals();
-    UpdateTimeLimitVisuals();
-    UpdatePointsVisuals();
-    UpdatePositionVisuals();
-    UpdateLapVisuals();
+    if (PlayerCarPawn->IsInputEnabled)
+    {
+        UpdateGasBarVisuals();
+        UpdateTimeLimitVisuals();
+        UpdatePointsVisuals();
+        UpdatePositionVisuals();
+        UpdateLapVisuals();
+    }
 }
 
 void ACarChaosPlayerController::SetupInputComponent()

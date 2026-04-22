@@ -54,7 +54,7 @@ public:
 	float CurrentSplineDistance = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
-	float LookAheadDistance = 800.f;
+	float LookAheadDistance = 2000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
 	float MaxGas = 100.f;
@@ -95,6 +95,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Car")
 	TArray<UStaticMeshComponent*> WheelMeshs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool IsInputEnabled = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float AccelerationPower = 350000.f;

@@ -98,13 +98,14 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
         UpdateGasBarValue();
 
         //Points
-        CurrentPoints += (PointsPerSecond * DeltaTime);
+        CurrentPoints += ((PointsPerSecond * (4.f / (float) CurrentPosition)) * DeltaTime);
 
         //Time and Gas check
         TimeRemaining = FMath::Clamp(TimeRemaining - DeltaTime, 0.f, TimeLimit);
 
         if (TimeRemaining <= 0.f || CurrentGas <= 0.f)
         {
+            IsInputEnabled = false;
             GameState->LoseRace();
         }
     }
@@ -152,17 +153,17 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
             float SteeringInput = FVector::CrossProduct(Forward, ToTarget).Z;
             SteeringInput = FMath::Clamp(SteeringInput, -1.f, 1.f);
-            Steer(SteeringInput);
+            Steer(SteeringInput * 2);
 
-            FVector NearPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + 300.f, ESplineCoordinateSpace::World);
-            FVector FarPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + 1000.f, ESplineCoordinateSpace::World);
+            FVector NearPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance/3, ESplineCoordinateSpace::World);
+            FVector FarPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance, ESplineCoordinateSpace::World);
 
             FVector Dir1 = (NearPoint - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
             FVector Dir2 = (FarPoint - NearPoint).GetSafeNormal();
 
             float CurveFactor = FVector::DotProduct(Dir1, Dir2);
 
-            float SpeedInput = FMath::Clamp(CurveFactor, 0.3f, 1.f);
+            float SpeedInput = FMath::Clamp(CurveFactor, 0.3f, (0.8f + 0.03f * CurrentPosition));
             ChangeSpeed(SpeedInput);
         }
     }
@@ -197,7 +198,11 @@ void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
 
     if (RoundsDone == 3) 
     {
-        GameState->FinishRace();
+        if (IsPlayer)
+        {
+            IsInputEnabled = false;
+            GameState->FinishRace();
+        }
     }
 }
 
@@ -255,6 +260,7 @@ bool ACarChaosCarPawnPC::IsGrounded()
 
 void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
 {
+    if (!IsInputEnabled) return;
     if (!IsGrounded()) return;
 
     float DeltaTime = GetWorld()->GetDeltaSeconds();
@@ -284,6 +290,8 @@ void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
 
 void ACarChaosCarPawnPC::Steer(float SteeringValue)
 {
+    if (!IsInputEnabled) return;
+
     FVector Forward = DirectionArrow->GetForwardVector();
     FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
     float ForwardSpeed = FVector::DotProduct(Velocity, Forward);

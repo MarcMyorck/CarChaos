@@ -26,19 +26,16 @@ protected:
     UPROPERTY(VisibleAnywhere)
     class UStaticMeshComponent* Mesh;
 
-    UPROPERTY(EditAnywhere, Category = "Pickup")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
     float FuelAmount = 25.f;
 
-    UPROPERTY(EditAnywhere, Category = "Pickup")
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
     float RespawnTime = 5.f;
 
     FTimerHandle RespawnTimer;
 
-    UPROPERTY(EditAnywhere)
-    TSubclassOf<ACarChaosCarPawnPC> PlayerClass;
-
-    UPROPERTY(EditAnywhere) //Change when enemy exists
-    TSubclassOf<ACarChaosCarPawnPC> EnemyClass;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickup")
+    TSubclassOf<ACarChaosCarPawnPC> CarClass;
 
     UFUNCTION()
     void OnOverlap(

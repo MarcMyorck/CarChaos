@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "MainHUDWidget.generated.h"
 
 UCLASS()
@@ -14,6 +15,8 @@ class CARCHAOS_API UMainHUDWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
+
+    virtual void NativeConstruct() override;
 
     UPROPERTY(meta = (BindWidget))
     UProgressBar* GasBar;
@@ -62,4 +65,13 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Lap")
     void UpdateLap();
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* ResultBG;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ResultTextBlock;
+
+    UFUNCTION(BlueprintCallable, Category = "Result")
+    void DisplayResult(bool IsWin);
 };

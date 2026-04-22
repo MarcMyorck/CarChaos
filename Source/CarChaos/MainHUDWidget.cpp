@@ -3,6 +3,14 @@
 
 #include "MainHUDWidget.h"
 
+void UMainHUDWidget::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    ResultBG->SetVisibility(ESlateVisibility::Collapsed);
+    ResultTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+}
+
 void UMainHUDWidget::UpdateGasBar()
 {
     if (!GasBar) return;
@@ -64,4 +72,23 @@ void UMainHUDWidget::UpdateLap()
     FText LapText = FText::FromString(LapString);
 
     LapTextBlock->SetText(LapText);
+}
+
+void UMainHUDWidget::DisplayResult(bool IsWin)
+{
+    ResultBG->SetVisibility(ESlateVisibility::Visible);
+    ResultTextBlock->SetVisibility(ESlateVisibility::Visible);
+
+    if (IsWin)
+    {
+        FString ResultString = FString::Printf(TEXT("You Won!"));
+        FText ResultText = FText::FromString(ResultString);
+        ResultTextBlock->SetText(ResultText);
+    }
+    else
+    {
+        FString ResultString = FString::Printf(TEXT("You Lost!"));
+        FText ResultText = FText::FromString(ResultString);
+        ResultTextBlock->SetText(ResultText);
+    }
 }

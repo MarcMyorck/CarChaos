@@ -52,11 +52,12 @@ void AGasPickup::OnOverlap(
     const FHitResult& SweepResult)
 {
     if (!OtherActor || OtherActor == this) return;
-    if (!PlayerClass || !EnemyClass) return;
+    if (!CarClass) return;
 
-    if (OtherActor->IsA(PlayerClass) || OtherActor->IsA(EnemyClass))
+    if (OtherActor->IsA(CarClass))
     {
-        if (OtherActor->IsA(PlayerClass)) {
+        ACarChaosCarPawnPC* TempCar = Cast<ACarChaosCarPawnPC>(OtherActor);
+        if (TempCar->IsPlayer) {
             ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
             if (PC)
             {
