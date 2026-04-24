@@ -153,7 +153,7 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
             float SteeringInput = FVector::CrossProduct(Forward, ToTarget).Z;
             SteeringInput = FMath::Clamp(SteeringInput, -1.f, 1.f);
-            Steer(SteeringInput * 2);
+            Steer(SteeringInput * 1.8f);
 
             FVector NearPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance/3, ESplineCoordinateSpace::World);
             FVector FarPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance, ESplineCoordinateSpace::World);

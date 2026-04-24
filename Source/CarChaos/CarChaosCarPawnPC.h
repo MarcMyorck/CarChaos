@@ -100,7 +100,7 @@ public:
 	bool IsInputEnabled = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float AccelerationPower = 350000.f;
+	float AccelerationPower = 300000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float BrakingPower = -250000.f;
@@ -109,7 +109,7 @@ public:
 	float Grip = 0.3f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float SteeringStrength = 800000000.f;
+	float SteeringStrength = 1600000000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float CurrentSteering = 0.f;
