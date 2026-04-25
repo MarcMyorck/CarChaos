@@ -39,9 +39,7 @@ public:
 
 	void UpdateCarRanking();
 
-	void FinishRace();
-
-	void LoseRace();
+	void FinishRace(bool IsWin);
 
 	virtual void Tick(float DeltaTime) override;
 

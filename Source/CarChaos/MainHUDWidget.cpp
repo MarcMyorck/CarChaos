@@ -9,6 +9,8 @@ void UMainHUDWidget::NativeConstruct()
 
     ResultBG->SetVisibility(ESlateVisibility::Collapsed);
     ResultTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+    ResultContinueTextBlock->SetVisibility(ESlateVisibility::Collapsed);
+
 }
 
 void UMainHUDWidget::UpdateGasBar()
@@ -78,16 +80,17 @@ void UMainHUDWidget::DisplayResult(bool IsWin)
 {
     ResultBG->SetVisibility(ESlateVisibility::Visible);
     ResultTextBlock->SetVisibility(ESlateVisibility::Visible);
+    ResultContinueTextBlock->SetVisibility(ESlateVisibility::Visible);
 
     if (IsWin)
     {
-        FString ResultString = FString::Printf(TEXT("You Won!"));
+        FString ResultString = FString::Printf(TEXT("Finish!"));
         FText ResultText = FText::FromString(ResultString);
         ResultTextBlock->SetText(ResultText);
     }
     else
     {
-        FString ResultString = FString::Printf(TEXT("You Lost!"));
+        FString ResultString = FString::Printf(TEXT("You did not make it!"));
         FText ResultText = FText::FromString(ResultString);
         ResultTextBlock->SetText(ResultText);
     }

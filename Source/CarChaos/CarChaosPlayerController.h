@@ -25,7 +25,11 @@ public:
 
     virtual void SetupInputComponent() override;
 
-    void HandleInput(const FInputActionValue& Value);
+    void HandleDriveInput(const FInputActionValue& Value);
+
+    void HandleOilInput(const FInputActionValue& Value);
+
+    void HandleContinueInput(const FInputActionValue& Value);
 
     void AddGas();
 
@@ -51,6 +55,12 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_Drive;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_DropOil;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_Continue;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UMainHUDWidget> MainHUDWidgetClass;

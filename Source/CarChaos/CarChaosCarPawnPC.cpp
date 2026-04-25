@@ -106,7 +106,8 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
         if (TimeRemaining <= 0.f || CurrentGas <= 0.f)
         {
             IsInputEnabled = false;
-            GameState->LoseRace();
+            IsRaceFinished = true;
+            GameState->FinishRace(false);
         }
     }
     else
@@ -163,8 +164,30 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
             float CurveFactor = FVector::DotProduct(Dir1, Dir2);
 
-            float SpeedInput = FMath::Clamp(CurveFactor, 0.3f, (0.8f + 0.03f * CurrentPosition));
+            float SpeedInput = FMath::Clamp(CurveFactor, 0.3f, (0.85f + 0.03f * CurrentPosition));
             ChangeSpeed(SpeedInput);
+
+            float OilDropRoll = FMath::FRand();
+            float AverageSecondsPerDrop = 10.f;
+            if (OilDropRoll < (DeltaTime / AverageSecondsPerDrop))
+            {
+                CurrentGas = 100.f;
+                DropOil();
+            }
+        }
+    }
+
+    if (OilSpinTimer < OilSpinDuration)
+    {
+        OilSpinTimer += DeltaTime;
+
+        float TurnTorque = (240.f * SteeringStrength) * DeltaTime;
+        FVector Torque(0.f, 0.f, TurnTorque);
+        CarBodyMesh->AddTorqueInDegrees(Torque);
+
+        if (OilSpinTimer >= OilSpinDuration)
+        {
+            IsInputEnabled = true;
         }
     }
 }
@@ -201,7 +224,8 @@ void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
         if (IsPlayer)
         {
             IsInputEnabled = false;
-            GameState->FinishRace();
+            IsRaceFinished = true;
+            GameState->FinishRace(true);
         }
     }
 }
@@ -315,5 +339,34 @@ void ACarChaosCarPawnPC::Steer(float SteeringValue)
 
     FVector Torque(0.f, 0.f, TurnTorque);
     CarBodyMesh->AddTorqueInDegrees(Torque);
+}
+
+void ACarChaosCarPawnPC::DropOil()
+{
+    if (!IsInputEnabled) return;
+
+    if (CurrentGas >= DropOilCost && IsGrounded())
+    {
+        CurrentGas -= DropOilCost;
+
+        UWorld* World = GetWorld();
+        FVector SpawnLocation = CarBodyMesh->GetComponentLocation() - (DirectionArrow->GetForwardVector() * 200.f);
+        SpawnLocation.Z = 11.f;
+        FRotator SpawnRotation(0.f, FMath::RandRange(0.0f, 360.0f), 0.f);
+        FActorSpawnParameters SpawnParams;
+
+        AActor* SpawnedActor = World->SpawnActor<AActor>(
+            OilObstacleBlueprintClass,
+            SpawnLocation,
+            SpawnRotation,
+            SpawnParams
+        );
+    }
+}
+
+void ACarChaosCarPawnPC::OilSpin()
+{
+    OilSpinTimer = 0.f;
+    IsInputEnabled = false;
 }
 

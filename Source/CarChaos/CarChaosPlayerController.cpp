@@ -2,6 +2,7 @@
 
 
 #include "CarChaosPlayerController.h"
+#include <Kismet/GameplayStatics.h>
 
 void ACarChaosPlayerController::BeginPlay()
 {
@@ -47,15 +48,37 @@ void ACarChaosPlayerController::SetupInputComponent()
     Super::SetupInputComponent();
 
     UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent);
-    EIC->BindAction(IA_Drive, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleInput);
+    EIC->BindAction(IA_Drive, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleDriveInput);
+    EIC->BindAction(IA_DropOil, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleOilInput);
+    EIC->BindAction(IA_Continue, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleContinueInput);
 }
 
-void ACarChaosPlayerController::HandleInput(const FInputActionValue& Value)
+void ACarChaosPlayerController::HandleDriveInput(const FInputActionValue& Value)
 {
     const FVector2D Axis = Value.Get<FVector2D>();
 
     PlayerCarPawn->ChangeSpeed(Axis.X);
     PlayerCarPawn->Steer(Axis.Y);
+}
+
+void ACarChaosPlayerController::HandleOilInput(const FInputActionValue& Value)
+{
+    const bool Input = Value.Get<bool>();
+
+    if (Input)
+    {
+        PlayerCarPawn->DropOil();
+    }
+}
+
+void ACarChaosPlayerController::HandleContinueInput(const FInputActionValue& Value)
+{
+    const bool Input = Value.Get<bool>();
+
+    if (Input && PlayerCarPawn->IsRaceFinished)
+    {
+        UGameplayStatics::OpenLevel(this, FName("MainMenu"));
+    }
 }
 
 void ACarChaosPlayerController::AddGas()

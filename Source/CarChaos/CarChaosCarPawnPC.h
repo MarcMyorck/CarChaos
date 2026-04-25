@@ -30,6 +30,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player/Enemy")
 	bool IsPlayer = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool IsRaceFinished = false;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
 	int RoundsDone = 0;
 
@@ -125,6 +128,22 @@ public:
 	void ChangeSpeed(float SpeedValue);
 
 	void Steer(float SteeringValue);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropOil")
+	TSubclassOf<AActor> OilObstacleBlueprintClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropOil")
+	float DropOilCost = 10.f;
+
+	void DropOil();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSpin")
+	float OilSpinTimer = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSpin")
+	float OilSpinDuration = 1.f;
+
+	void OilSpin();
 
 	virtual void Tick(float DeltaTime) override;
 

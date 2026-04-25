@@ -72,6 +72,9 @@ public:
     UPROPERTY(meta = (BindWidget))
     UTextBlock* ResultTextBlock;
 
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ResultContinueTextBlock;
+
     UFUNCTION(BlueprintCallable, Category = "Result")
     void DisplayResult(bool IsWin);
 };

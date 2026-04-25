@@ -142,22 +142,12 @@ void ACarChaosRacingGameState::UpdateCarRanking()
 	}
 }
 
-void ACarChaosRacingGameState::FinishRace()
+void ACarChaosRacingGameState::FinishRace(bool IsWin)
 {
 	//When player finishes all rounds successfully
 	ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 	if (PC)
 	{
-		PC->MainHUDWidget->DisplayResult(true);
-	}
-}
-
-void ACarChaosRacingGameState::LoseRace()
-{
-	//When player runs out of time or gas
-	ACarChaosPlayerController* PC = Cast<ACarChaosPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
-	if (PC)
-	{
-		PC->MainHUDWidget->DisplayResult(false);
+		PC->MainHUDWidget->DisplayResult(IsWin);
 	}
 }
