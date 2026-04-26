@@ -1,9 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "CarChaosCarPawnPC.h"
 #include "CarChaosRacingGameState.h"
 #include "RacingCheckpoint.h"
-#include "CarChaosCarPawnPC.h"
 
 // Sets default values
 ACarChaosCarPawnPC::ACarChaosCarPawnPC()
@@ -273,7 +273,7 @@ bool ACarChaosCarPawnPC::IsGrounded()
 
             //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, Hit.GetActor()->GetActorLabel());
 
-            if (Hit.GetActor()->GetActorLabel().Contains(TEXT("grass")) || Hit.GetActor()->GetActorLabel().Contains(TEXT("Sand")))
+            if (Hit.GetActor()->ActorHasTag(TEXT("offroad")))
             {
                 OffroadWheels++;
             }

@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "CarChaosCarPawnPC.h"
 #include "RacingCheckpoint.h"
+#include "CarChaosCarPawnPC.h"
 
 ARacingCheckpoint::ARacingCheckpoint()
 {
@@ -13,10 +13,6 @@ ARacingCheckpoint::ARacingCheckpoint()
 void ARacingCheckpoint::BeginPlay()
 {
 	Super::BeginPlay();
-
-    FString CurrentActorLabel = GetActorLabel();
-    FString NumberString = CurrentActorLabel.RightChop(FString(TEXT("Checkpoint")).Len());
-    CheckpointNumber = FCString::Atoi(*NumberString);
 
 	Collision = FindComponentByClass<UBoxComponent>();
     Collision->OnComponentBeginOverlap.AddDynamic(this, &ARacingCheckpoint::OnOverlap);

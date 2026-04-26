@@ -1,12 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+#include "CarChaosRacingGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "CarChaosCarPawnPC.h"
 #include "RacingCheckpoint.h"
 #include "CarChaosPlayerController.h"
 #include "MainHUDWidget.h"
-#include "CarChaosRacingGameState.h"
 
 ACarChaosRacingGameState::ACarChaosRacingGameState()
 {
@@ -32,7 +32,7 @@ void ACarChaosRacingGameState::BeginPlay()
 
 	for (AActor* Actor : FoundActorsSplines)
 	{
-		if (Actor->GetActorLabel().Contains("BP_RacingSpline"))
+		if (Actor->ActorHasTag(TEXT("aispline")))
 		{
 			TArray<USplineComponent*> SplineMeshes;
 			Actor->GetComponents<USplineComponent>(SplineMeshes);
