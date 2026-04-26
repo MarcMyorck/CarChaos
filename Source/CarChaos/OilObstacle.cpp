@@ -39,7 +39,7 @@ void AOilObstacle::OnOverlap(
     if (OtherActor->IsA(CarClass))
     {
         ACarChaosCarPawnPC* TempCar = Cast<ACarChaosCarPawnPC>(OtherActor);
-        TempCar->OilSpin();
+        TempCar->StartOilSlow();
 
         Destroy();
     }

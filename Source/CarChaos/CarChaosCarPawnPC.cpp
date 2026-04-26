@@ -20,6 +20,9 @@ void ACarChaosCarPawnPC::BeginPlay()
     CarBodyMesh = Cast<UStaticMeshComponent>(GetDefaultSubobjectByName(TEXT("body")));
     DirectionArrow = FindComponentByClass<UArrowComponent>();
 
+    CarCollisionCapsule = Cast<UCapsuleComponent>(GetDefaultSubobjectByName(TEXT("BumpOffHitbox")));
+    CarCollisionCapsule->OnComponentHit.AddDynamic(this, &ACarChaosCarPawnPC::OnCarHit);
+
     TArray<UStaticMeshComponent*> Components;
     GetComponents<UStaticMeshComponent>(Components);
 
@@ -43,21 +46,24 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
     if (IsGrounded())
     {
-        //Sideways Grip
-        FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
+        if (!IsOilSlowed)
+        {
+            //Sideways Grip (Not during Oil Slow to make car feel slippery)
+            FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
 
-        FVector Forward = DirectionArrow->GetForwardVector();
-        FVector Right = DirectionArrow->GetRightVector();
+            FVector Forward = DirectionArrow->GetForwardVector();
+            FVector Right = DirectionArrow->GetRightVector();
 
-        float ForwardSpeed = FVector::DotProduct(Velocity, Forward);
-        float SidewaysSpeed = FVector::DotProduct(Velocity, Right);
+            float ForwardSpeed = FVector::DotProduct(Velocity, Forward);
+            float SidewaysSpeed = FVector::DotProduct(Velocity, Right);
 
-        FVector ForwardVelocity = Forward * ForwardSpeed;
-        FVector SidewaysVelocity = Right * SidewaysSpeed;
+            FVector ForwardVelocity = Forward * ForwardSpeed;
+            FVector SidewaysVelocity = Right * SidewaysSpeed;
 
-        FVector NewVelocity = ForwardVelocity + (SidewaysVelocity * Grip);
+            FVector NewVelocity = ForwardVelocity + (SidewaysVelocity * Grip);
 
-        CarBodyMesh->SetPhysicsLinearVelocity(NewVelocity);
+            CarBodyMesh->SetPhysicsLinearVelocity(NewVelocity);
+        }
 
         //General Settings
         CarBodyMesh->SetLinearDamping(0.6f);
@@ -154,7 +160,8 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
             float SteeringInput = FVector::CrossProduct(Forward, ToTarget).Z;
             SteeringInput = FMath::Clamp(SteeringInput, -1.f, 1.f);
-            Steer(SteeringInput * 1.8f);
+            float AISteeringBonusFactor = 1.8f;
+            Steer(SteeringInput * AISteeringBonusFactor);
 
             FVector NearPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance/3, ESplineCoordinateSpace::World);
             FVector FarPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance, ESplineCoordinateSpace::World);
@@ -164,12 +171,16 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
             float CurveFactor = FVector::DotProduct(Dir1, Dir2);
 
-            float SpeedInput = FMath::Clamp(CurveFactor, 0.3f, (0.85f + 0.03f * CurrentPosition));
+            float AIBaseSpeedFactor = 0.95f;
+            float AIPositionSpeedBonusFactor = 0.5f;
+
+            float SpeedInput = FMath::Clamp(CurveFactor, 0.1f, (AIBaseSpeedFactor + AIPositionSpeedBonusFactor * CurrentPosition));
             ChangeSpeed(SpeedInput);
 
             float OilDropRoll = FMath::FRand();
-            float AverageSecondsPerDrop = 10.f;
-            if (OilDropRoll < (DeltaTime / AverageSecondsPerDrop))
+            float AverageSecondsPerDrop = 40.f;
+            float ReducedSecondsPerPosition = 4.f;
+            if (OilDropRoll < (DeltaTime / (AverageSecondsPerDrop - ReducedSecondsPerPosition * CurrentPosition)))
             {
                 CurrentGas = 100.f;
                 DropOil();
@@ -177,17 +188,18 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
         }
     }
 
-    if (OilSpinTimer < OilSpinDuration)
+    if (IsOilSlowed)
     {
-        OilSpinTimer += DeltaTime;
+        OilSlowTimer += DeltaTime;
 
-        float TurnTorque = (240.f * SteeringStrength) * DeltaTime;
-        FVector Torque(0.f, 0.f, TurnTorque);
-        CarBodyMesh->AddTorqueInDegrees(Torque);
-
-        if (OilSpinTimer >= OilSpinDuration)
+        if (OilSlowTimer >= OilSlowDuration)
         {
-            IsInputEnabled = true;
+            IsOilSlowed = false;
+
+            for (UStaticMeshComponent* WheelMesh : WheelMeshs)
+            {
+                WheelMesh->SetMaterial(0, OriginalTireMat);
+            }
         }
     }
 }
@@ -294,13 +306,27 @@ void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
 
     if (SpeedValue > 0)
     {
-        FVector AccelerationForce = FlatForward * (AccelerationPower * (1 - (OffroadPenalty * CurrentOffroadValue)));
-        CarBodyMesh->AddForce(AccelerationForce * SpeedValue);
+        FVector AccelerationForce = (FlatForward * (AccelerationPower * (1 - (OffroadPenalty * CurrentOffroadValue)))) * SpeedValue;
+
+        if (IsOilSlowed)
+        {
+            //Small Slowdown during Oil
+            AccelerationForce = AccelerationForce * OilSlowFactor;
+        }
+
+        CarBodyMesh->AddForce(AccelerationForce);
     }
     else if (SpeedValue < 0)
     {
-        FVector BrakingForce = FlatForward * (BrakingPower * (1 - (OffroadPenalty * CurrentOffroadValue)));
-        CarBodyMesh->AddForce(BrakingForce * -SpeedValue);
+        FVector BrakingForce = (FlatForward * (BrakingPower * (1 - (OffroadPenalty * CurrentOffroadValue)))) * -SpeedValue;
+
+        if (IsOilSlowed)
+        {
+            //No braking during Oil because of no friction
+            BrakingForce = FVector::ZeroVector;
+        }
+
+        CarBodyMesh->AddForce(BrakingForce);
     }
     else
     {
@@ -341,6 +367,30 @@ void ACarChaosCarPawnPC::Steer(float SteeringValue)
     CarBodyMesh->AddTorqueInDegrees(Torque);
 }
 
+void ACarChaosCarPawnPC::OnCarHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit)
+{
+    if (OtherActor && OtherActor != this)
+    {
+        ACarChaosCarPawnPC* OtherCar = Cast<ACarChaosCarPawnPC>(OtherActor);
+        if (OtherCar)
+        {
+            FVector HitNormal = Hit.ImpactNormal;
+            FVector CarVelocity = CarBodyMesh->GetPhysicsLinearVelocity();
+            FVector OtherCarVelocity = OtherCar->CarBodyMesh->GetPhysicsLinearVelocity();
+
+            FVector RelativeVelocity = CarVelocity - OtherCarVelocity;
+            float RelativeSpeed = FVector::DotProduct(RelativeVelocity, HitNormal);
+            if (RelativeSpeed < 0)
+            {
+                FVector BounceForce = HitNormal * BounceOffStrength;
+
+                CarBodyMesh->AddForce(-BounceForce);
+                OtherCar->CarBodyMesh->AddForce(BounceForce);
+            }
+        }
+    }
+}
+
 void ACarChaosCarPawnPC::DropOil()
 {
     if (!IsInputEnabled) return;
@@ -351,7 +401,6 @@ void ACarChaosCarPawnPC::DropOil()
 
         UWorld* World = GetWorld();
         FVector SpawnLocation = CarBodyMesh->GetComponentLocation() - (DirectionArrow->GetForwardVector() * 200.f);
-        SpawnLocation.Z = 11.f;
         FRotator SpawnRotation(0.f, FMath::RandRange(0.0f, 360.0f), 0.f);
         FActorSpawnParameters SpawnParams;
 
@@ -364,9 +413,14 @@ void ACarChaosCarPawnPC::DropOil()
     }
 }
 
-void ACarChaosCarPawnPC::OilSpin()
+void ACarChaosCarPawnPC::StartOilSlow()
 {
-    OilSpinTimer = 0.f;
-    IsInputEnabled = false;
+    IsOilSlowed = true;
+    OilSlowTimer = 0.f;
+
+    for (UStaticMeshComponent* WheelMesh : WheelMeshs)
+    {
+        WheelMesh->SetMaterial(0, OilTireMat);
+    }
 }
 

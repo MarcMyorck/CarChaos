@@ -129,6 +129,15 @@ public:
 
 	void Steer(float SteeringValue);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision Bounce Off")
+	UCapsuleComponent* CarCollisionCapsule;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision Bounce Off")
+	float BounceOffStrength = 50000.f;
+
+	UFUNCTION()
+	void OnCarHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropOil")
 	TSubclassOf<AActor> OilObstacleBlueprintClass;
 
@@ -137,13 +146,25 @@ public:
 
 	void DropOil();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSpin")
-	float OilSpinTimer = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSlow")
+	bool IsOilSlowed = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSpin")
-	float OilSpinDuration = 1.f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSlow")
+	float OilSlowTimer = 3.f;
 
-	void OilSpin();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSlow")
+	float OilSlowDuration = 3.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSlow")
+	float OilSlowFactor = 0.8f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSlow")
+	UMaterialInterface* OriginalTireMat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSlow")
+	UMaterialInterface* OilTireMat;
+
+	void StartOilSlow();
 
 	virtual void Tick(float DeltaTime) override;
 
