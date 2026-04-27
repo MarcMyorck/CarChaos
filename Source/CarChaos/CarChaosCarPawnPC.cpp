@@ -384,8 +384,8 @@ void ACarChaosCarPawnPC::OnCarHit(UPrimitiveComponent* HitComponent, AActor* Oth
             {
                 FVector BounceForce = HitNormal * BounceOffStrength;
 
-                CarBodyMesh->AddForce(-BounceForce);
-                OtherCar->CarBodyMesh->AddForce(BounceForce);
+                CarBodyMesh->AddForce(BounceForce);
+                OtherCar->CarBodyMesh->AddForce(-BounceForce);
             }
         }
     }

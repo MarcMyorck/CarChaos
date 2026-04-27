@@ -133,7 +133,7 @@ public:
 	UCapsuleComponent* CarCollisionCapsule;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision Bounce Off")
-	float BounceOffStrength = 50000.f;
+	float BounceOffStrength = 1000000.0f;
 
 	UFUNCTION()
 	void OnCarHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
