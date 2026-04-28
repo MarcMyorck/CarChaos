@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState")
 	ACarChaosRacingGameState* GameState;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState")
+	bool IsInStarting = true;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player/Enemy")
 	bool IsPlayer = false;
 

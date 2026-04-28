@@ -54,13 +54,14 @@ void ACarChaosRacingGameState::BeginPlay()
 		TempCar->RacingSpline = RacingSplines[FMath::RandRange(0, RacingSplines.Num() - 1)];
 		Cars.Add(TempCar);
 	}
+
+	//Set up starting sequence
+	SetupStartingSequence();
 }
 
 void ACarChaosRacingGameState::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	UE_LOG(LogTemp, Verbose, TEXT("GameState Tick"));
 
 	if (!IsCheckpointsSorted) 
 	{
@@ -138,6 +139,39 @@ void ACarChaosRacingGameState::UpdateCarRanking()
 		if (Car)
 		{
 			Car->CurrentPosition = i + 1;
+		}
+	}
+}
+
+void ACarChaosRacingGameState::SetupStartingSequence()
+{
+	FTimerHandle TimerHandle1;
+	FTimerHandle TimerHandle2;
+	FTimerHandle TimerHandle3;
+	FTimerHandle TimerHandle4;
+
+	GetWorldTimerManager().SetTimer(TimerHandle1, this, &ACarChaosRacingGameState::PlayStartingSound1, 1.0f, false);
+	GetWorldTimerManager().SetTimer(TimerHandle2, this, &ACarChaosRacingGameState::PlayStartingSound1, 2.0f, false);
+	GetWorldTimerManager().SetTimer(TimerHandle3, this, &ACarChaosRacingGameState::PlayStartingSound1, 3.0f, false);
+
+	GetWorldTimerManager().SetTimer(TimerHandle4, this, &ACarChaosRacingGameState::PlayStartingSound2, 4.0f, false);
+}
+
+void ACarChaosRacingGameState::PlayStartingSound1()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, StartingSound1, { 1890.f, 100.f, 32.f});
+}
+
+void ACarChaosRacingGameState::PlayStartingSound2()
+{
+	UGameplayStatics::PlaySoundAtLocation(this, StartingSound2, { 1890.f, 100.f, 32.f });
+
+	for (int32 i = 0; i < Cars.Num(); ++i)
+	{
+		ACarChaosCarPawnPC* Car = Cars[i];
+		if (Car)
+		{
+			Car->IsInStarting = false;
 		}
 	}
 }

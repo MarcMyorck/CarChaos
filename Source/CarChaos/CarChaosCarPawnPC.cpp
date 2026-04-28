@@ -44,6 +44,8 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (IsInStarting) return;
+
     if (IsGrounded())
     {
         if (!IsOilSlowed)
@@ -296,6 +298,7 @@ bool ACarChaosCarPawnPC::IsGrounded()
 
 void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
 {
+    if (IsInStarting) return;
     if (!IsInputEnabled) return;
     if (!IsGrounded()) return;
 
@@ -340,6 +343,7 @@ void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
 
 void ACarChaosCarPawnPC::Steer(float SteeringValue)
 {
+    if (IsInStarting) return;
     if (!IsInputEnabled) return;
 
     FVector Forward = DirectionArrow->GetForwardVector();

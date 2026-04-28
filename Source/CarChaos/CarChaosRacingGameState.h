@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SplineComponent.h"
+#include "Sound/SoundBase.h"
 #include "GameFramework/GameStateBase.h"
 #include "CarChaosRacingGameState.generated.h"
 
@@ -38,6 +39,18 @@ public:
 	TArray<USplineComponent*> RacingSplines;
 
 	void UpdateCarRanking();
+
+	void SetupStartingSequence();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Starting Sequence")
+	USoundBase* StartingSound1;
+
+	void PlayStartingSound1();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Starting Sequence")
+	USoundBase* StartingSound2;
+
+	void PlayStartingSound2();
 
 	void FinishRace(bool IsWin);
 
