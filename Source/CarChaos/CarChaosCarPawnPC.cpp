@@ -179,13 +179,22 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
             float SpeedInput = FMath::Clamp(CurveFactor, 0.1f, (AIBaseSpeedFactor + AIPositionSpeedBonusFactor * CurrentPosition));
             ChangeSpeed(SpeedInput);
 
-            float OilDropRoll = FMath::FRand();
+            float DropRoll = FMath::FRand();
             float AverageSecondsPerDrop = 40.f;
             float ReducedSecondsPerPosition = 4.f;
-            if (OilDropRoll < (DeltaTime / (AverageSecondsPerDrop - ReducedSecondsPerPosition * CurrentPosition)))
+            if (DropRoll < (DeltaTime / (AverageSecondsPerDrop - ReducedSecondsPerPosition * CurrentPosition)))
             {
                 CurrentGas = 100.f;
-                DropOil();
+
+                float DropRoll2 = FMath::FRand();
+                if (DropRoll2 < 0.5f)
+                {
+                    DropOil();
+                }
+                else
+                {
+                    DropRocket();
+                }
             }
         }
     }
@@ -428,3 +437,25 @@ void ACarChaosCarPawnPC::StartOilSlow()
     }
 }
 
+void ACarChaosCarPawnPC::DropRocket()
+{
+    if (!IsInputEnabled) return;
+
+    if (CurrentGas >= DropRocketCost)
+    {
+        CurrentGas -= DropRocketCost;
+
+        UWorld* World = GetWorld();
+        FVector SpawnLocation = CarBodyMesh->GetComponentLocation() + (DirectionArrow->GetForwardVector() * 200.f);
+        SpawnLocation.Z += 40.f;
+        FRotator SpawnRotation = DirectionArrow->GetForwardVector().Rotation();
+        FActorSpawnParameters SpawnParams;
+
+        AActor* SpawnedActor = World->SpawnActor<AActor>(
+            RocketObstacleBlueprintClass,
+            SpawnLocation,
+            SpawnRotation,
+            SpawnParams
+        );
+    }
+}

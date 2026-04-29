@@ -149,6 +149,14 @@ public:
 
 	void DropOil();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropRocket")
+	TSubclassOf<AActor> RocketObstacleBlueprintClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DropRocket")
+	float DropRocketCost = 10.f;
+
+	void DropRocket();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OilSlow")
 	bool IsOilSlowed = false;
 

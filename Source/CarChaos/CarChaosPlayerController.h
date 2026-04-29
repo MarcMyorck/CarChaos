@@ -29,6 +29,8 @@ public:
 
     void HandleOilInput(const FInputActionValue& Value);
 
+    void HandleRocketInput(const FInputActionValue& Value);
+
     void HandleContinueInput(const FInputActionValue& Value);
 
     void AddGas();
@@ -58,6 +60,9 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_DropOil;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_DropRocket;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_Continue;

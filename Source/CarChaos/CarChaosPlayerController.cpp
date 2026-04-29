@@ -50,6 +50,7 @@ void ACarChaosPlayerController::SetupInputComponent()
     UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(InputComponent);
     EIC->BindAction(IA_Drive, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleDriveInput);
     EIC->BindAction(IA_DropOil, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleOilInput);
+    EIC->BindAction(IA_DropRocket, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleRocketInput);
     EIC->BindAction(IA_Continue, ETriggerEvent::Triggered, this, &ACarChaosPlayerController::HandleContinueInput);
 }
 
@@ -68,6 +69,16 @@ void ACarChaosPlayerController::HandleOilInput(const FInputActionValue& Value)
     if (Input)
     {
         PlayerCarPawn->DropOil();
+    }
+}
+
+void ACarChaosPlayerController::HandleRocketInput(const FInputActionValue& Value)
+{
+    const bool Input = Value.Get<bool>();
+
+    if (Input)
+    {
+        PlayerCarPawn->DropRocket();
     }
 }
 

@@ -61,13 +61,12 @@ void UMainHUDWidget::UpdatePosition()
     if (!PositionImage) return;
     if (CurrentPosition < 1 || CurrentPosition > 4) return;
 
-    UTexture2D* NewTexture = PositionTextures[CurrentPosition - 1];
-    FSlateBrush NewBrush;
-    NewBrush.SetResourceObject(NewTexture);
-
-    PositionImage->SetBrush(NewBrush);
-    PositionImage->SetBrushSize({ 500.f, 500.f });
     PositionImage->SetColorAndOpacity(PositionColors[CurrentPosition - 1]);
+
+    FString PositionString = FString::Printf(TEXT("%d"), CurrentPosition);
+    FText PositionText = FText::FromString(PositionString);
+
+    PositionTextBlock->SetText(PositionText);
 }
 
 void UMainHUDWidget::UpdateLap()

@@ -51,8 +51,8 @@ public:
     UPROPERTY(meta = (BindWidget))
     UImage* PositionImage;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
-    TArray<UTexture2D*> PositionTextures;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PositionTextBlock;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
     TArray<FLinearColor> PositionColors;
