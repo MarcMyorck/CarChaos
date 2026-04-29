@@ -49,6 +49,9 @@ protected:
 
     void RespawnPickup();
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+    USoundBase* PickupSound;
+
     FVector StartLocation;
 
     UPROPERTY(EditAnywhere, Category = "Pickup|Animation")

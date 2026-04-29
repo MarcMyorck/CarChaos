@@ -49,7 +49,13 @@ public:
     void UpdatePoints();
 
     UPROPERTY(meta = (BindWidget))
-    UTextBlock* PositionTextBlock;
+    UImage* PositionImage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
+    TArray<UTexture2D*> PositionTextures;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
+    TArray<FLinearColor> PositionColors;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Position")
     int CurrentPosition = 0;

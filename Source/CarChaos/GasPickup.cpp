@@ -62,6 +62,7 @@ void AGasPickup::OnOverlap(
             if (PC)
             {
                 PC->AddGas();
+                UGameplayStatics::PlaySoundAtLocation(this, PickupSound, GetActorLocation());
             }
         }
 
