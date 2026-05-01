@@ -213,6 +213,20 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
             }
         }
     }
+    if (IsRocketSlowed)
+    {
+        RocketSlowTimer += DeltaTime;
+
+        if (RocketSlowTimer >= RocketSlowDuration)
+        {
+            IsRocketSlowed = false;
+
+            for (UStaticMeshComponent* WheelMesh : WheelMeshs)
+            {
+                WheelMesh->SetMaterial(0, OriginalTireMat);
+            }
+        }
+    }
 }
 
 void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
@@ -310,6 +324,7 @@ void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
     if (IsInStarting) return;
     if (!IsInputEnabled) return;
     if (!IsGrounded()) return;
+    if (IsRocketSlowed) return;
 
     float DeltaTime = GetWorld()->GetDeltaSeconds();
 
@@ -457,5 +472,16 @@ void ACarChaosCarPawnPC::DropRocket()
             SpawnRotation,
             SpawnParams
         );
+    }
+}
+
+void ACarChaosCarPawnPC::StartRocketSlow()
+{
+    IsRocketSlowed = true;
+    RocketSlowTimer = 0.f;
+
+    for (UStaticMeshComponent* WheelMesh : WheelMeshs)
+    {
+        WheelMesh->SetMaterial(0, RocketTireMat);
     }
 }

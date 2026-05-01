@@ -177,6 +177,20 @@ public:
 
 	void StartOilSlow();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RocketSlow")
+	bool IsRocketSlowed = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RocketSlow")
+	float RocketSlowTimer = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RocketSlow")
+	float RocketSlowDuration = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RocketSlow")
+	UMaterialInterface* RocketTireMat;
+
+	void StartRocketSlow();
+
 	virtual void Tick(float DeltaTime) override;
 
 protected:

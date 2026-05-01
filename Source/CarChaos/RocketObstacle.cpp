@@ -19,6 +19,8 @@ void ARocketObstacle::BeginPlay()
     Collision->OnComponentBeginOverlap.AddDynamic(this, &ARocketObstacle::OnOverlap);
 
     DirectionArrow = FindComponentByClass<UArrowComponent>();
+
+    ExplosionNiagaraComponent = FindComponentByClass<UNiagaraComponent>();
 }
 
 void ARocketObstacle::Tick(float DeltaTime)
@@ -52,8 +54,40 @@ void ARocketObstacle::OnOverlap(
     if (OtherActor->IsA(CarClass))
     {
         ACarChaosCarPawnPC* TempCar = Cast<ACarChaosCarPawnPC>(OtherActor);
-        TempCar->StartOilSlow();
+        TempCar->StartRocketSlow();
     }
     
+    TArray<UActorComponent*> Components;
+    GetComponents(Components);
+
+    for (UActorComponent* Comp : Components)
+    {
+        if (Comp != ExplosionNiagaraComponent)
+        {
+            if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+            {
+                Prim->SetHiddenInGame(true);
+                Prim->SetVisibility(false);
+                Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            }
+        }
+    }
+
+    ExplosionNiagaraComponent->SetWorldRotation(FRotator::ZeroRotator);
+    ExplosionNiagaraComponent->SetHiddenInGame(false);
+    ExplosionNiagaraComponent->SetVisibility(true);
+    ExplosionNiagaraComponent->Activate(true);
+
+    GetWorldTimerManager().SetTimer(
+        ExplosionTimer,
+        this,
+        &ARocketObstacle::DeleteRocket,
+        ExplosionTime,
+        false
+    );
+}
+
+void ARocketObstacle::DeleteRocket()
+{
     Destroy();
 }

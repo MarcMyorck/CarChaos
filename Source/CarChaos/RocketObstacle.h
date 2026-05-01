@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "CarChaosCarPawnPC.h"
 #include "RacingCheckpoint.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "RocketObstacle.generated.h"
 
 UCLASS()
@@ -51,6 +53,17 @@ protected:
         bool bFromSweep,
         const FHitResult& SweepResult
     );
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
+    float ExplosionTime = 2.f;
+
+    FTimerHandle ExplosionTimer;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Explosion")
+    UNiagaraComponent* ExplosionNiagaraComponent;
+
+    UFUNCTION(BlueprintCallable, Category = "Delete")
+    void DeleteRocket();
 
     UPROPERTY(EditAnywhere, Category = "Animation")
     float RotateSpeed = 180.f;
