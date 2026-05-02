@@ -4,6 +4,7 @@
 #include "CarChaosCarPawnPC.h"
 #include "CarChaosRacingGameState.h"
 #include "RacingCheckpoint.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 ACarChaosCarPawnPC::ACarChaosCarPawnPC()
@@ -39,12 +40,74 @@ void ACarChaosCarPawnPC::BeginPlay()
     GameState = GetWorld() ? GetWorld()->GetGameState<ACarChaosRacingGameState>() : nullptr;
 
     LastPosition = CarBodyMesh->GetComponentLocation();
+
+    if (AccelerateSound)
+    {
+        AccelerateAudioComponent = UGameplayStatics::SpawnSoundAttached(
+            AccelerateSound,
+            CarBodyMesh,
+            NAME_None,
+            FVector::ZeroVector,
+            EAttachLocation::KeepRelativeOffset,
+            false, 
+            0.0f
+        );
+
+        AccelerateAudioComponent->bIsUISound = true;
+    }
+
+    if (BrakeSound)
+    {
+        BrakeAudioComponent = UGameplayStatics::SpawnSoundAttached(
+            BrakeSound,
+            CarBodyMesh,
+            NAME_None,
+            FVector::ZeroVector,
+            EAttachLocation::KeepRelativeOffset,
+            true,
+            0.0f
+        );
+
+        BrakeAudioComponent->bIsUISound = true;
+    }
+
+    if (SustainSound)
+    {
+        SustainAudioComponent = UGameplayStatics::SpawnSoundAttached(
+            SustainSound,
+            CarBodyMesh,
+            NAME_None,
+            FVector::ZeroVector,
+            EAttachLocation::KeepRelativeOffset,
+            true,
+            0.1f
+        );
+
+        SustainAudioComponent->bIsUISound = true;
+    }
+
+    if (GrassSound)
+    {
+        GrassAudioComponent = UGameplayStatics::SpawnSoundAttached(
+            GrassSound,
+            CarBodyMesh,
+            NAME_None,
+            FVector::ZeroVector,
+            EAttachLocation::KeepRelativeOffset,
+            true,
+            0.0f
+        );
+
+        GrassAudioComponent->bIsUISound = true;
+    }
 }
 
 // Called every frame
 void ACarChaosCarPawnPC::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (IsPlayer) UpdateCarSounds();
 
     if (IsInStarting) return;
 
@@ -193,11 +256,11 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
                 float CurveFactor = FVector::DotProduct(Dir1, Dir2);
 
-                float AIBaseSpeedFactor = 1.1f;
+                float AIBaseSpeedFactor = 0.95f;
                 float AIPositionSpeedBonusFactor = 0.15f;
 
-                float SpeedInput = FMath::Clamp(CurveFactor, 0.1f, (AIBaseSpeedFactor + AIPositionSpeedBonusFactor * CurrentPosition));
-                ChangeSpeed(SpeedInput);
+                float SpeedInput = FMath::Clamp(CurveFactor, 0.1f, 1.f);
+                ChangeSpeed(SpeedInput * (AIBaseSpeedFactor + AIPositionSpeedBonusFactor * CurrentPosition));
 
                 float ClosestKey = RacingSpline->FindInputKeyClosestToWorldLocation(CarBodyMesh->GetComponentLocation());
                 CurrentSplineDistance = RacingSpline->GetDistanceAlongSplineAtSplineInputKey(ClosestKey);
@@ -533,5 +596,64 @@ void ACarChaosCarPawnPC::StartRocketSlow()
     for (UStaticMeshComponent* WheelMesh : WheelMeshs)
     {
         WheelMesh->SetMaterial(0, RocketTireMat);
+    }
+}
+
+void ACarChaosCarPawnPC::UpdateCarSounds()
+{
+    FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
+    float ForwardSpeed = FVector::DotProduct(Velocity, DirectionArrow->GetForwardVector());
+    float AbsSpeed = FMath::Abs(ForwardSpeed);
+
+    if(IsPlayer) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AbsSpeed: %f"), AbsSpeed));
+
+    if (CurrentSpeedInput > 0 && FMath::IsNearlyZero(ForwardSpeed, 5.f))
+    {
+        if (AccelerateAudioComponent && !AccelerateSoundPlayed)
+        {
+            AccelerateAudioComponent->SetVolumeMultiplier(FMath::Clamp(CurrentSpeedInput, 0.f, 1.f));
+            if (!AccelerateAudioComponent->IsPlaying())
+            {
+                AccelerateAudioComponent->Play();
+                AccelerateSoundPlayed = true;
+            }
+        }
+    }
+    else
+    {
+        if (AccelerateAudioComponent && AccelerateAudioComponent->IsPlaying())
+        {
+            AccelerateSoundPlayed = false;
+        }
+    }
+
+    if ((ForwardSpeed > 0.f && CurrentSpeedInput < 0) || (ForwardSpeed > 100.f && CurrentSpeedInput == 0))
+    {
+        if (BrakeAudioComponent)
+        {
+            BrakeAudioComponent->SetVolumeMultiplier(FMath::Clamp(FMath::Abs(CurrentSpeedInput), 0.f, 1.f));
+            if (!BrakeAudioComponent->IsPlaying()) BrakeAudioComponent->Play();
+        }
+    }
+    else
+    {
+        if (BrakeAudioComponent && BrakeAudioComponent->IsPlaying())
+        {
+            BrakeAudioComponent->SetVolumeMultiplier(0.f);
+        }
+    }
+
+    if (SustainAudioComponent)
+    {
+        float Volume = FMath::Clamp(AbsSpeed / 2050.f, 0.05f, 1.f);
+        SustainAudioComponent->SetVolumeMultiplier(Volume);
+        SustainAudioComponent->SetPitchMultiplier(FMath::Clamp(0.8f + (AbsSpeed / 3075.f), 0.8f, 2.0f));
+        if (!SustainAudioComponent->IsPlaying()) SustainAudioComponent->Play();
+    }
+
+    if (GrassAudioComponent)
+    {
+        GrassAudioComponent->SetVolumeMultiplier(CurrentOffroadValue);
+        if (!GrassAudioComponent->IsPlaying()) GrassAudioComponent->Play();
     }
 }

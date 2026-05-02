@@ -10,6 +10,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/ArrowComponent.h"
 #include "Components/SplineComponent.h"
+#include "Components/AudioComponent.h"
 #include "CarChaosCarPawnPC.generated.h"
 
 class ACarChaosRacingGameState;
@@ -193,15 +194,47 @@ public:
 	bool IsRocketSlowed = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RocketSlow")
-	float RocketSlowTimer = 1.f;
+	float RocketSlowTimer = 1.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RocketSlow")
-	float RocketSlowDuration = 1.f;
+	float RocketSlowDuration = 1.5f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "RocketSlow")
 	UMaterialInterface* RocketTireMat;
 
 	void StartRocketSlow();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	USoundBase* AccelerateSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	USoundBase* BrakeSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	USoundBase* SustainSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	USoundBase* JumpSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	USoundBase* GrassSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	UAudioComponent* AccelerateAudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	UAudioComponent* BrakeAudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	UAudioComponent* SustainAudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	UAudioComponent* GrassAudioComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "CarSounds")
+	bool AccelerateSoundPlayed = false;
+
+	void UpdateCarSounds();
 
 	virtual void Tick(float DeltaTime) override;
 

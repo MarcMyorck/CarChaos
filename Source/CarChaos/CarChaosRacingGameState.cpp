@@ -149,12 +149,15 @@ void ACarChaosRacingGameState::SetupStartingSequence()
 	FTimerHandle TimerHandle2;
 	FTimerHandle TimerHandle3;
 	FTimerHandle TimerHandle4;
+	FTimerHandle TimerHandle5;
 
 	GetWorldTimerManager().SetTimer(TimerHandle1, this, &ACarChaosRacingGameState::PlayStartingSound1, 1.0f, false);
 	GetWorldTimerManager().SetTimer(TimerHandle2, this, &ACarChaosRacingGameState::PlayStartingSound1, 2.0f, false);
 	GetWorldTimerManager().SetTimer(TimerHandle3, this, &ACarChaosRacingGameState::PlayStartingSound1, 3.0f, false);
 
 	GetWorldTimerManager().SetTimer(TimerHandle4, this, &ACarChaosRacingGameState::PlayStartingSound2, 4.0f, false);
+
+	GetWorldTimerManager().SetTimer(TimerHandle5, this, &ACarChaosRacingGameState::PlayGameMusic, 5.0f, false);
 }
 
 void ACarChaosRacingGameState::PlayStartingSound1()
@@ -174,6 +177,11 @@ void ACarChaosRacingGameState::PlayStartingSound2()
 			Car->IsInStarting = false;
 		}
 	}
+}
+
+void ACarChaosRacingGameState::PlayGameMusic()
+{
+	UGameplayStatics::PlaySound2D(this, GameMusic, 0.3f);
 }
 
 void ACarChaosRacingGameState::FinishRace(bool IsWin)

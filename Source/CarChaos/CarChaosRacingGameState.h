@@ -52,6 +52,11 @@ public:
 
 	void PlayStartingSound2();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Starting Sequence")
+	USoundBase* GameMusic;
+
+	void PlayGameMusic();
+
 	void FinishRace(bool IsWin);
 
 	virtual void Tick(float DeltaTime) override;
