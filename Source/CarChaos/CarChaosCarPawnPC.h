@@ -62,6 +62,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
 	float LookAheadDistance = 2000.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
+	FVector LastPosition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
+	float StuckTimer = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
+	float RecoveryTimer = 3.f;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
 	float MaxGas = 100.f;
 
@@ -69,7 +78,7 @@ public:
 	float CurrentGas = 100.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
-	float GasUsage = 3.5f;
+	float GasUsage = 3.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Gas")
 	float GasPickupValue = 25.f;
@@ -119,6 +128,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float CurrentSteering = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float CurrentSpeedInput = 0.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float OffroadPenalty = 0.60f;

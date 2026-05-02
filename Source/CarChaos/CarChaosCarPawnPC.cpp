@@ -37,6 +37,8 @@ void ACarChaosCarPawnPC::BeginPlay()
     TimeRemaining = TimeLimit;
 
     GameState = GetWorld() ? GetWorld()->GetGameState<ACarChaosRacingGameState>() : nullptr;
+
+    LastPosition = CarBodyMesh->GetComponentLocation();
 }
 
 // Called every frame
@@ -151,51 +153,97 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
         {
             if (!RacingSpline) return;
 
-            float ClosestKey = RacingSpline->FindInputKeyClosestToWorldLocation(CarBodyMesh->GetComponentLocation());
-            CurrentSplineDistance = RacingSpline->GetDistanceAlongSplineAtSplineInputKey(ClosestKey);
-
-            float TargetDistance = CurrentSplineDistance + LookAheadDistance;
-            FVector TargetLocation = RacingSpline->GetLocationAtDistanceAlongSpline(TargetDistance, ESplineCoordinateSpace::World);
-
-            FVector Forward = DirectionArrow->GetForwardVector();
-            FVector ToTarget = (TargetLocation - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
-
-            float SteeringInput = FVector::CrossProduct(Forward, ToTarget).Z;
-            SteeringInput = FMath::Clamp(SteeringInput, -1.f, 1.f);
-            float AISteeringBonusFactor = 1.8f;
-            Steer(SteeringInput * AISteeringBonusFactor);
-
-            FVector NearPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance/3, ESplineCoordinateSpace::World);
-            FVector FarPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance, ESplineCoordinateSpace::World);
-
-            FVector Dir1 = (NearPoint - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
-            FVector Dir2 = (FarPoint - NearPoint).GetSafeNormal();
-
-            float CurveFactor = FVector::DotProduct(Dir1, Dir2);
-
-            float AIBaseSpeedFactor = 0.95f;
-            float AIPositionSpeedBonusFactor = 0.5f;
-
-            float SpeedInput = FMath::Clamp(CurveFactor, 0.1f, (AIBaseSpeedFactor + AIPositionSpeedBonusFactor * CurrentPosition));
-            ChangeSpeed(SpeedInput);
-
-            float DropRoll = FMath::FRand();
-            float AverageSecondsPerDrop = 40.f;
-            float ReducedSecondsPerPosition = 4.f;
-            if (DropRoll < (DeltaTime / (AverageSecondsPerDrop - ReducedSecondsPerPosition * CurrentPosition)))
+            if (StuckTimer >= 3.f)
             {
-                CurrentGas = 100.f;
+                RecoveryTimer = 0.f;
+            }
+            if (StuckTimer >= 5.f)
+            {
+                FVector SafeLocation = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance, ESplineCoordinateSpace::World);
+                SetActorLocation(SafeLocation + FVector(0, 0, 50));
+                StuckTimer = 0.f;
+                RecoveryTimer = 0.5f;
+            }
 
-                float DropRoll2 = FMath::FRand();
-                if (DropRoll2 < 0.5f)
+            if (RecoveryTimer < 0.25f)
+            {
+                RecoveryTimer += DeltaTime;
+                ChangeSpeed(-1.f);
+
+                FVector CarForward = DirectionArrow->GetForwardVector();
+                FVector VectorToPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance, ESplineCoordinateSpace::World) - CarBodyMesh->GetComponentLocation();
+                FVector ToPointNormalized = VectorToPoint.GetSafeNormal();
+                float CrossProductResult = FVector::CrossProduct(CarForward, ToPointNormalized).Z;
+
+                Steer(-CrossProductResult);
+
+                if (RecoveryTimer >= 0.25f)
                 {
-                    DropOil();
-                }
-                else
-                {
-                    DropRocket();
+                    CurrentSpeedInput = 0.f;
+                    CurrentSteering = 0.f;
                 }
             }
+            else
+            {
+                FVector NearPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance / 3, ESplineCoordinateSpace::World);
+                FVector FarPoint = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance + LookAheadDistance, ESplineCoordinateSpace::World);
+
+                FVector Dir1 = (NearPoint - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
+                FVector Dir2 = (FarPoint - NearPoint).GetSafeNormal();
+
+                float CurveFactor = FVector::DotProduct(Dir1, Dir2);
+
+                float AIBaseSpeedFactor = 1.1f;
+                float AIPositionSpeedBonusFactor = 0.15f;
+
+                float SpeedInput = FMath::Clamp(CurveFactor, 0.1f, (AIBaseSpeedFactor + AIPositionSpeedBonusFactor * CurrentPosition));
+                ChangeSpeed(SpeedInput);
+
+                float ClosestKey = RacingSpline->FindInputKeyClosestToWorldLocation(CarBodyMesh->GetComponentLocation());
+                CurrentSplineDistance = RacingSpline->GetDistanceAlongSplineAtSplineInputKey(ClosestKey);
+
+                float TargetDistance = CurrentSplineDistance + LookAheadDistance;
+                FVector TargetLocation = RacingSpline->GetLocationAtDistanceAlongSpline(TargetDistance, ESplineCoordinateSpace::World);
+
+                FVector Forward = DirectionArrow->GetForwardVector();
+                FVector ToTarget = (TargetLocation - CarBodyMesh->GetComponentLocation()).GetSafeNormal();
+
+                float SteeringInput = FVector::CrossProduct(Forward, ToTarget).Z;
+                SteeringInput = FMath::Clamp(SteeringInput, -1.f, 1.f);
+                float AISteeringBonusFactor = 1.8f;
+                Steer(SteeringInput * AISteeringBonusFactor);
+
+                float DropRoll = FMath::FRand();
+                float AverageSecondsPerDrop = 40.f;
+                float ReducedSecondsPerPosition = 4.f;
+                if (DropRoll < (DeltaTime / (AverageSecondsPerDrop - ReducedSecondsPerPosition * CurrentPosition)))
+                {
+                    CurrentGas = 100.f;
+
+                    float DropRoll2 = FMath::FRand();
+                    if (DropRoll2 < 0.5f)
+                    {
+                        DropOil();
+                    }
+                    else
+                    {
+                        DropRocket();
+                    }
+                }
+            }
+
+            float MovementDistance = FVector::Dist(CarBodyMesh->GetComponentLocation(), LastPosition);
+
+            if (MovementDistance < 5.f)
+            {
+                StuckTimer += DeltaTime;
+            }
+            else
+            {
+                StuckTimer = 0.f;
+            }
+
+            LastPosition = CarBodyMesh->GetComponentLocation();
         }
     }
 
@@ -363,6 +411,8 @@ void ACarChaosCarPawnPC::ChangeSpeed(float SpeedValue)
             CarBodyMesh->SetPhysicsLinearVelocity(FVector::ZeroVector);
         }
     }
+
+    CurrentSpeedInput = SpeedValue;
 }
 
 void ACarChaosCarPawnPC::Steer(float SteeringValue)
@@ -374,7 +424,7 @@ void ACarChaosCarPawnPC::Steer(float SteeringValue)
     FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
     float ForwardSpeed = FVector::DotProduct(Velocity, Forward);
 
-    if (ForwardSpeed < 0.f)
+    if (ForwardSpeed < 0.f && CurrentSpeedInput < 0.f)
     {
         SteeringValue = -SteeringValue;
     }
