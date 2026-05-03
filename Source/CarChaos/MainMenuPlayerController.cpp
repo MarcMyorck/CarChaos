@@ -2,6 +2,7 @@
 
 
 #include "MainMenuPlayerController.h"
+#include <Kismet/GameplayStatics.h>
 
 void AMainMenuPlayerController::BeginPlay()
 {
@@ -20,4 +21,6 @@ void AMainMenuPlayerController::BeginPlay()
             bShowMouseCursor = true;
         }
     }
+
+    UGameplayStatics::PlaySound2D(this, GameMusicMM, 0.3f);
 }

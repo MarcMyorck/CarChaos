@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "Blueprint/UserWidget.h"
+#include "Sound/SoundBase.h"
 #include "MainMenuPlayerController.generated.h"
 
 /**
@@ -23,5 +24,8 @@ public:
 	TSubclassOf<UUserWidget> MainMenuWidgetClass;
 
 	UUserWidget* MainMenuWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Music")
+	USoundBase* GameMusicMM;
 
 };

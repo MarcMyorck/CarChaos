@@ -49,11 +49,15 @@ void ACarChaosCarPawnPC::BeginPlay()
             NAME_None,
             FVector::ZeroVector,
             EAttachLocation::KeepRelativeOffset,
-            false, 
-            0.0f
+            true,
+            0.0f,
+            1.0f,
+            0.0f,
+            nullptr,
+            nullptr,
+            false
         );
-
-        AccelerateAudioComponent->bIsUISound = true;
+        AccelerateAudioComponent->bIsUISound = false;
     }
 
     if (BrakeSound)
@@ -65,10 +69,14 @@ void ACarChaosCarPawnPC::BeginPlay()
             FVector::ZeroVector,
             EAttachLocation::KeepRelativeOffset,
             true,
-            0.0f
+            0.0f,
+            1.0f,
+            0.0f,
+            nullptr,
+            nullptr,
+            false
         );
-
-        BrakeAudioComponent->bIsUISound = true;
+        BrakeAudioComponent->bIsUISound = false;
     }
 
     if (SustainSound)
@@ -80,10 +88,14 @@ void ACarChaosCarPawnPC::BeginPlay()
             FVector::ZeroVector,
             EAttachLocation::KeepRelativeOffset,
             true,
-            0.1f
+            0.1f,
+            1.0f,
+            0.0f,
+            nullptr,
+            nullptr,
+            false
         );
-
-        SustainAudioComponent->bIsUISound = true;
+        SustainAudioComponent->bIsUISound = false;
     }
 
     if (GrassSound)
@@ -95,10 +107,14 @@ void ACarChaosCarPawnPC::BeginPlay()
             FVector::ZeroVector,
             EAttachLocation::KeepRelativeOffset,
             true,
-            0.0f
+            0.0f,
+            1.0f,
+            0.0f,
+            nullptr,
+            nullptr,
+            false
         );
-
-        GrassAudioComponent->bIsUISound = true;
+        GrassAudioComponent->bIsUISound = false;
     }
 }
 
@@ -107,7 +123,7 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (IsPlayer) UpdateCarSounds();
+    /*if (IsPlayer)*/ UpdateCarSounds();
 
     if (IsInStarting) return;
 
@@ -256,7 +272,7 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
                 float CurveFactor = FVector::DotProduct(Dir1, Dir2);
 
-                float AIBaseSpeedFactor = 0.95f;
+                float AIBaseSpeedFactor = 0.9f;
                 float AIPositionSpeedBonusFactor = 0.15f;
 
                 float SpeedInput = FMath::Clamp(CurveFactor, 0.1f, 1.f);
@@ -604,14 +620,16 @@ void ACarChaosCarPawnPC::UpdateCarSounds()
     FVector Velocity = CarBodyMesh->GetPhysicsLinearVelocity();
     float ForwardSpeed = FVector::DotProduct(Velocity, DirectionArrow->GetForwardVector());
     float AbsSpeed = FMath::Abs(ForwardSpeed);
+    float VolumeMultiplier = 1.f;
+    if (!IsPlayer) VolumeMultiplier = 0.2f;
 
-    if(IsPlayer) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AbsSpeed: %f"), AbsSpeed));
+    //if(IsPlayer) GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("AbsSpeed: %f"), AbsSpeed));
 
     if (CurrentSpeedInput > 0 && FMath::IsNearlyZero(ForwardSpeed, 5.f))
     {
         if (AccelerateAudioComponent && !AccelerateSoundPlayed)
         {
-            AccelerateAudioComponent->SetVolumeMultiplier(FMath::Clamp(CurrentSpeedInput, 0.f, 1.f));
+            AccelerateAudioComponent->SetVolumeMultiplier(FMath::Clamp(CurrentSpeedInput, 0.f, 1.f) * VolumeMultiplier);
             if (!AccelerateAudioComponent->IsPlaying())
             {
                 AccelerateAudioComponent->Play();
@@ -631,7 +649,7 @@ void ACarChaosCarPawnPC::UpdateCarSounds()
     {
         if (BrakeAudioComponent)
         {
-            BrakeAudioComponent->SetVolumeMultiplier(FMath::Clamp(FMath::Abs(CurrentSpeedInput), 0.f, 1.f));
+            BrakeAudioComponent->SetVolumeMultiplier(FMath::Clamp(FMath::Abs(CurrentSpeedInput), 0.f, 1.f) * VolumeMultiplier);
             if (!BrakeAudioComponent->IsPlaying()) BrakeAudioComponent->Play();
         }
     }
@@ -647,13 +665,13 @@ void ACarChaosCarPawnPC::UpdateCarSounds()
     {
         float Volume = FMath::Clamp(AbsSpeed / 2050.f, 0.05f, 1.f);
         SustainAudioComponent->SetVolumeMultiplier(Volume);
-        SustainAudioComponent->SetPitchMultiplier(FMath::Clamp(0.8f + (AbsSpeed / 3075.f), 0.8f, 2.0f));
+        SustainAudioComponent->SetPitchMultiplier(FMath::Clamp(0.8f + (AbsSpeed / 3075.f), 0.8f, 2.0f) * VolumeMultiplier);
         if (!SustainAudioComponent->IsPlaying()) SustainAudioComponent->Play();
     }
 
     if (GrassAudioComponent)
     {
-        GrassAudioComponent->SetVolumeMultiplier(CurrentOffroadValue);
+        GrassAudioComponent->SetVolumeMultiplier(CurrentOffroadValue * VolumeMultiplier);
         if (!GrassAudioComponent->IsPlaying()) GrassAudioComponent->Play();
     }
 }

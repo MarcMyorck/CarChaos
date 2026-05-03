@@ -157,17 +157,17 @@ void ACarChaosRacingGameState::SetupStartingSequence()
 
 	GetWorldTimerManager().SetTimer(TimerHandle4, this, &ACarChaosRacingGameState::PlayStartingSound2, 4.0f, false);
 
-	GetWorldTimerManager().SetTimer(TimerHandle5, this, &ACarChaosRacingGameState::PlayGameMusic, 5.0f, false);
+	GetWorldTimerManager().SetTimer(TimerHandle5, this, &ACarChaosRacingGameState::PlayGameMusic, 4.5f, false);
 }
 
 void ACarChaosRacingGameState::PlayStartingSound1()
 {
-	UGameplayStatics::PlaySoundAtLocation(this, StartingSound1, { 1890.f, 100.f, 32.f});
+	UGameplayStatics::PlaySound2D(this, StartingSound1, 1.5f);
 }
 
 void ACarChaosRacingGameState::PlayStartingSound2()
 {
-	UGameplayStatics::PlaySoundAtLocation(this, StartingSound2, { 1890.f, 100.f, 32.f });
+	UGameplayStatics::PlaySound2D(this, StartingSound2, 1.5f);
 
 	for (int32 i = 0; i < Cars.Num(); ++i)
 	{
