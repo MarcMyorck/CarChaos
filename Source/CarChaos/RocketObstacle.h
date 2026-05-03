@@ -67,4 +67,7 @@ protected:
 
     UPROPERTY(EditAnywhere, Category = "Animation")
     float RotateSpeed = 180.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sounds")
+    USoundBase* ExplosionSound;
 };

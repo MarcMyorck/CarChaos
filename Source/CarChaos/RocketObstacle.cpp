@@ -55,6 +55,8 @@ void ARocketObstacle::OnOverlap(
     {
         ACarChaosCarPawnPC* TempCar = Cast<ACarChaosCarPawnPC>(OtherActor);
         TempCar->StartRocketSlow();
+
+        UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation(), 4.f);
     }
     
     TArray<UActorComponent*> Components;

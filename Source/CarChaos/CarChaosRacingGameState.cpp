@@ -162,12 +162,12 @@ void ACarChaosRacingGameState::SetupStartingSequence()
 
 void ACarChaosRacingGameState::PlayStartingSound1()
 {
-	UGameplayStatics::PlaySound2D(this, StartingSound1, 1.5f);
+	UGameplayStatics::PlaySound2D(this, StartingSound1, 2.5f);
 }
 
 void ACarChaosRacingGameState::PlayStartingSound2()
 {
-	UGameplayStatics::PlaySound2D(this, StartingSound2, 1.5f);
+	UGameplayStatics::PlaySound2D(this, StartingSound2, 2.5f);
 
 	for (int32 i = 0; i < Cars.Num(); ++i)
 	{

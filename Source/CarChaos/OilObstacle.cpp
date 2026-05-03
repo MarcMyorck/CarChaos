@@ -41,7 +41,33 @@ void AOilObstacle::OnOverlap(
         ACarChaosCarPawnPC* TempCar = Cast<ACarChaosCarPawnPC>(OtherActor);
         TempCar->StartOilSlow();
 
-        Destroy();
+        UGameplayStatics::PlaySoundAtLocation(this, OilSlipSound, GetActorLocation(), 4.f);
+
+        TArray<UActorComponent*> Components;
+        GetComponents(Components);
+
+        for (UActorComponent* Comp : Components)
+        {
+            if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(Comp))
+            {
+                Prim->SetHiddenInGame(true);
+                Prim->SetVisibility(false);
+                Prim->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+            }
+        }
+
+        GetWorldTimerManager().SetTimer(
+            OilSlipSoundTimer,
+            this,
+            &AOilObstacle::DeleteOil,
+            OilSlipSoundDuration,
+            false
+        );
     }
+}
+
+void AOilObstacle::DeleteOil()
+{
+    Destroy();
 }
 

@@ -36,4 +36,15 @@ protected:
         bool bFromSweep,
         const FHitResult& SweepResult
     );
+
+    UFUNCTION(BlueprintCallable, Category = "Delete")
+    void DeleteOil();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sounds")
+    USoundBase* OilSlipSound;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sounds")
+    float OilSlipSoundDuration = 1.f;
+
+    FTimerHandle OilSlipSoundTimer;
 };
