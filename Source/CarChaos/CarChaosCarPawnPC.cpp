@@ -127,7 +127,9 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
     if (IsInStarting) return;
 
-    if (IsGrounded())
+    bool TickIsGrounded = IsGrounded();
+
+    if (TickIsGrounded)
     {
         if (!IsOilSlowed)
         {
@@ -186,6 +188,28 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
         //Gas
         UpdateGasBarValue();
 
+        //Jumping
+        if (TickIsGrounded) {
+            CurrentJumpTimer = 0.f;
+            if (IsJumping) {
+                IsJumping = false;
+                CurrentPoints += CurrentJumpPoints;
+                MainHUDWidget->AddPointsBonus(CurrentJumpPoints, "Airtime!");
+                CurrentJumpPoints = 0.f;
+            }
+        }
+        else {
+            CurrentJumpTimer += DeltaTime;
+            if (!IsJumping && CurrentJumpTimer >= JumpTimeThreshold) {
+                IsJumping = true;
+                UGameplayStatics::PlaySoundAtLocation(this, JumpSound, CarBodyMesh->GetComponentLocation());
+                CurrentJumpPoints += JumpBasePoints;
+            }
+            if (IsJumping) {
+                CurrentJumpPoints += (JumpPointsPerSecond * DeltaTime);
+            }
+        }
+
         //Points
         CurrentPoints += ((PointsPerSecond * (4.f / (float) CurrentPosition)) * DeltaTime);
 
@@ -239,7 +263,7 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
             if (StuckTimer >= 5.f)
             {
                 FVector SafeLocation = RacingSpline->GetLocationAtDistanceAlongSpline(CurrentSplineDistance, ESplineCoordinateSpace::World);
-                SetActorLocation(SafeLocation + FVector(0, 0, 50));
+                CarBodyMesh->SetAllPhysicsPosition(SafeLocation + FVector(0, 0, 50));
                 StuckTimer = 0.f;
                 RecoveryTimer = 0.5f;
             }
@@ -379,6 +403,21 @@ void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
         CurrentCheckpoint = 1;
         NextCheckpointObject = GameState->Checkpoints[CurrentCheckpoint];
     }
+    else if (CheckpointNumber != CurrentCheckpoint)
+    {
+        CarBodyMesh->SetSimulatePhysics(false);
+
+        CarBodyMesh->SetPhysicsLinearVelocity(FVector::ZeroVector);
+        CarBodyMesh->SetPhysicsAngularVelocityInDegrees(FVector::ZeroVector);
+
+        FVector SafeLocation = GameState->Checkpoints[CurrentCheckpoint]->GetActorLocation();
+        SafeLocation.Z += 50.f;
+        FRotator SafeRotation = GameState->Checkpoints[CurrentCheckpoint]->GetActorRotation();
+
+        CarBodyMesh->SetWorldLocationAndRotation(SafeLocation, SafeRotation);
+
+        CarBodyMesh->SetSimulatePhysics(true);
+    }
 
     //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("New Round %d"), RoundsDone));
     //GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("New Checkpoint number %d"), CurrentCheckpoint));
@@ -394,6 +433,15 @@ void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
     }
 }
 
+void ACarChaosCarPawnPC::UpdatePosition(int NewPosition)
+{
+    if (IsPlayer && NewPosition < CurrentPosition) {
+        CurrentPoints += PointsPerOvertake;
+        MainHUDWidget->AddPointsBonus(PointsPerOvertake, "Overtake!");
+    }
+    CurrentPosition = NewPosition;
+}
+
 void ACarChaosCarPawnPC::UpdateGasBarValue()
 {
     CurrentGas = FMath::Clamp(CurrentGas - (GasUsage * (GetWorld()->GetDeltaSeconds())), 0.f, MaxGas);
@@ -402,7 +450,10 @@ void ACarChaosCarPawnPC::UpdateGasBarValue()
 void ACarChaosCarPawnPC::AddGas()
 {
     CurrentGas = FMath::Clamp(CurrentGas + GasPickupValue, 0.f, MaxGas);
-    CurrentPoints += PointsPerPickup;
+    if (IsPlayer) {
+        CurrentPoints += PointsPerPickup;
+        MainHUDWidget->AddPointsBonus(PointsPerPickup, "Gas Pickup!");
+    }
 }
 
 bool ACarChaosCarPawnPC::IsGrounded()
@@ -567,6 +618,19 @@ void ACarChaosCarPawnPC::DropOil()
             SpawnRotation,
             SpawnParams
         );
+
+        if (AOilObstacle* Oil = Cast<AOilObstacle>(SpawnedActor))
+        {
+            Oil->CarRef = this;
+            Oil->Activate();
+        }
+    }
+}
+
+void ACarChaosCarPawnPC::OilHit()
+{
+    if (IsPlayer) {
+        MainHUDWidget->AddPointsBonus(PointsPerOilHit, "Oil Hit!");
     }
 }
 
@@ -601,6 +665,19 @@ void ACarChaosCarPawnPC::DropRocket()
             SpawnRotation,
             SpawnParams
         );
+
+        if (ARocketObstacle* Rocket = Cast<ARocketObstacle>(SpawnedActor))
+        {
+            Rocket->CarRef = this;
+            Rocket->Activate();
+        }
+    }
+}
+
+void ACarChaosCarPawnPC::RocketHit()
+{
+    if (IsPlayer) {
+        MainHUDWidget->AddPointsBonus(PointsPerRocketHit, "Rocket Hit!");
     }
 }
 
@@ -675,3 +752,12 @@ void ACarChaosCarPawnPC::UpdateCarSounds()
         if (!GrassAudioComponent->IsPlaying()) GrassAudioComponent->Play();
     }
 }
+
+/*Points for
+Position
+Jump
+Overtake
+Pickup
+Rocket Hit
+Oil Hit
+*/

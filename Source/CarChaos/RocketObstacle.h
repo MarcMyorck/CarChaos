@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "CarChaosCarPawnPC.h"
+#include "Components/CapsuleComponent.h"
 #include "RacingCheckpoint.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 #include "RocketObstacle.generated.h"
+
+class ACarChaosCarPawnPC;
 
 UCLASS()
 class CARCHAOS_API ARocketObstacle : public AActor
@@ -19,6 +21,12 @@ public:
     ARocketObstacle();
 
     virtual void Tick(float DeltaTime) override;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Origin")
+    ACarChaosCarPawnPC* CarRef;
+
+    UFUNCTION(BlueprintCallable, Category = "Activate")
+    void Activate();
 
 protected:
     virtual void BeginPlay() override;

@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "MainHUDWidget.h"
+#include "OilObstacle.h"
+#include "RocketObstacle.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
@@ -50,6 +52,8 @@ public:
 	int CurrentPosition = 0;
 
 	void UpdateCheckpoint(int CheckpointNumber);
+
+	void UpdatePosition(int NewPosition);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AINavigation")
 	ARacingCheckpoint* NextCheckpointObject;
@@ -101,7 +105,32 @@ public:
 	float PointsPerSecond = 50.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
-	float PointsPerPickup = 250.f;
+	float PointsPerPickup = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float PointsPerOvertake = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float CurrentJumpPoints = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float JumpBasePoints = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float JumpPointsPerSecond = 200.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float PointsPerRocketHit = 200.f;
+
+	void RocketHit();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	float PointsPerOilHit = 200.f;
+
+	void OilHit();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Points")
+	UMainHUDWidget* MainHUDWidget;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Car")
 	UStaticMeshComponent* CarBodyMesh;
@@ -144,6 +173,15 @@ public:
 	void ChangeSpeed(float SpeedValue);
 
 	void Steer(float SteeringValue);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jumping")
+	float CurrentJumpTimer = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jumping")
+	float JumpTimeThreshold = 0.5f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Jumping")
+	bool IsJumping = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Collision Bounce Off")
 	UCapsuleComponent* CarCollisionCapsule;

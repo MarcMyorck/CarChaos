@@ -3,6 +3,7 @@
 #include "RocketObstacle.h"
 #include "Components/SphereComponent.h"
 #include "TimerManager.h"
+#include "CarChaosCarPawnPC.h"
 #include "CarChaosPlayerController.h"
 #include <Kismet/GameplayStatics.h>
 
@@ -16,11 +17,15 @@ void ARocketObstacle::BeginPlay()
     Super::BeginPlay();
 
     Collision = FindComponentByClass<UCapsuleComponent>();
-    Collision->OnComponentBeginOverlap.AddDynamic(this, &ARocketObstacle::OnOverlap);
 
     DirectionArrow = FindComponentByClass<UArrowComponent>();
 
     ExplosionNiagaraComponent = FindComponentByClass<UNiagaraComponent>();
+}
+
+void ARocketObstacle::Activate()
+{
+    Collision->OnComponentBeginOverlap.AddDynamic(this, &ARocketObstacle::OnOverlap);
 }
 
 void ARocketObstacle::Tick(float DeltaTime)
@@ -57,6 +62,8 @@ void ARocketObstacle::OnOverlap(
         TempCar->StartRocketSlow();
 
         UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation(), 4.f);
+
+        CarRef->RocketHit();
     }
     
     TArray<UActorComponent*> Components;

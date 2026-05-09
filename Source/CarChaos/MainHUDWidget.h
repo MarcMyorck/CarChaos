@@ -9,6 +9,8 @@
 #include "Components/Image.h"
 #include "MainHUDWidget.generated.h"
 
+class ACarChaosCarPawnPC;
+
 UCLASS()
 class CARCHAOS_API UMainHUDWidget : public UUserWidget
 {
@@ -49,6 +51,39 @@ public:
     void UpdatePoints();
 
     UPROPERTY(meta = (BindWidget))
+    UTextBlock* PointsBonusPositionTextBlock;
+
+    UFUNCTION(BlueprintCallable, Category = "Point Bonus")
+    void UpdatePointsBonusPosition(float PositionPoints);
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PointsBonus1TextBlock;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PointsBonus2TextBlock;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PointsBonus3TextBlock;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Point Bonus")
+    float PointsBonus1Timer = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Point Bonus")
+    float PointsBonus2Timer = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Point Bonus")
+    float PointsBonus3Timer = 0.f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Point Bonus")
+    float PointsBonusDuration = 3.f;
+
+    UFUNCTION(BlueprintCallable, Category = "Point Bonus")
+    void AddPointsBonus(float Points, FString BonusText);
+
+    UFUNCTION(BlueprintCallable, Category = "Point Bonus")
+    void UpdatePointsBonusTimers(float Time);
+
+    UPROPERTY(meta = (BindWidget))
     UImage* PositionImage;
 
     UPROPERTY(meta = (BindWidget))
@@ -83,4 +118,28 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Result")
     void DisplayResult(bool IsWin);
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* MinimapImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* MinimapPlayerImage;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* MinimapEnemyImage1;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* MinimapEnemyImage2;
+
+    UPROPERTY(meta = (BindWidget))
+    UImage* MinimapEnemyImage3;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Minimap")
+    TArray<ACarChaosCarPawnPC*> CarRefs;
+
+    UFUNCTION(BlueprintCallable, Category = "Minimap")
+    void UpdateMinimap();
+
+    UFUNCTION(BlueprintCallable, Category = "Minimap")
+    FVector2D MapWorldToMinimap(FVector WorldLocation);
 };

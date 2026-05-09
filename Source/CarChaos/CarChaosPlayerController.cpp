@@ -18,6 +18,7 @@ void ACarChaosPlayerController::BeginPlay()
 
     PlayerCarPawn = Cast<ACarChaosCarPawnPC>(GetPawn());
     PlayerCarPawn->IsPlayer = true;
+    PlayerCarPawn->MainHUDWidget = MainHUDWidget;
     UpdateGasBarVisuals();
     UpdateTimeLimitVisuals();
     UpdatePointsVisuals();
@@ -41,6 +42,9 @@ void ACarChaosPlayerController::Tick(float DeltaTime)
         UpdatePositionVisuals();
         UpdateLapVisuals();
     }
+
+    MainHUDWidget->UpdatePointsBonusTimers(DeltaTime);
+    MainHUDWidget->UpdateMinimap();
 }
 
 void ACarChaosPlayerController::SetupInputComponent()
@@ -132,6 +136,7 @@ void ACarChaosPlayerController::UpdatePositionVisuals()
     {
         MainHUDWidget->CurrentPosition = PlayerCarPawn->CurrentPosition;
         MainHUDWidget->UpdatePosition();
+        MainHUDWidget->UpdatePointsBonusPosition(PlayerCarPawn->PointsPerSecond);
     }
 }
 

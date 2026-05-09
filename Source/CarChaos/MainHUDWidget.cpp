@@ -2,6 +2,8 @@
 
 
 #include "MainHUDWidget.h"
+#include "CarChaosCarPawnPC.h"
+#include <Kismet/GameplayStatics.h>
 
 void UMainHUDWidget::NativeConstruct()
 {
@@ -11,6 +13,9 @@ void UMainHUDWidget::NativeConstruct()
     ResultTextBlock->SetVisibility(ESlateVisibility::Collapsed);
     ResultContinueTextBlock->SetVisibility(ESlateVisibility::Collapsed);
 
+    PointsBonus1TextBlock->SetText(FText::GetEmpty());
+    PointsBonus2TextBlock->SetText(FText::GetEmpty());
+    PointsBonus3TextBlock->SetText(FText::GetEmpty());
 }
 
 void UMainHUDWidget::UpdateGasBar()
@@ -56,6 +61,63 @@ void UMainHUDWidget::UpdatePoints()
     PointsTextBlock->SetText(PointsText);
 }
 
+void UMainHUDWidget::UpdatePointsBonusPosition(float PositionPoints)
+{
+    if (!PointsBonusPositionTextBlock) return;
+
+    int32 PointsInt = FMath::FloorToInt((PositionPoints * (4.f / (float)CurrentPosition)));
+
+    FString PointsString = FString::Printf(TEXT("+%d/s Position Bonus"), PointsInt);
+    FText PointsText = FText::FromString(PointsString);
+
+    PointsBonusPositionTextBlock->SetText(PointsText);
+}
+
+void UMainHUDWidget::AddPointsBonus(float Points, FString BonusText)
+{
+    if (!PointsBonus1TextBlock || !PointsBonus2TextBlock || !PointsBonus3TextBlock) return;
+
+    PointsBonus3Timer = PointsBonus2Timer;
+    PointsBonus3TextBlock->SetText(PointsBonus2TextBlock->GetText());
+
+    PointsBonus2Timer = PointsBonus1Timer;
+    PointsBonus2TextBlock->SetText(PointsBonus1TextBlock->GetText());
+
+    PointsBonus1Timer = 0.1f;
+    int32 PointsInt = FMath::FloorToInt(Points);
+
+    FString PointsString = FString::Printf(TEXT("+%d %s"), PointsInt, *BonusText);
+    FText PointsText = FText::FromString(PointsString);
+
+    PointsBonus1TextBlock->SetText(PointsText);
+}
+
+void UMainHUDWidget::UpdatePointsBonusTimers(float Time)
+{
+    if (!PointsBonus1TextBlock || !PointsBonus2TextBlock || !PointsBonus3TextBlock) return;
+
+    if (PointsBonus1Timer > 0.f) {
+        PointsBonus1Timer += Time;
+        if (PointsBonus1Timer >= PointsBonusDuration) {
+            PointsBonus1TextBlock->SetText(FText::GetEmpty());
+        }
+    }
+
+    if (PointsBonus2Timer > 0.f) {
+        PointsBonus2Timer += Time;
+        if (PointsBonus2Timer >= PointsBonusDuration) {
+            PointsBonus2TextBlock->SetText(FText::GetEmpty());
+        }
+    }
+
+    if (PointsBonus3Timer > 0.f) {
+        PointsBonus3Timer += Time;
+        if (PointsBonus3Timer >= PointsBonusDuration) {
+            PointsBonus3TextBlock->SetText(FText::GetEmpty());
+        }
+    }
+}
+
 void UMainHUDWidget::UpdatePosition()
 {
     if (!PositionImage) return;
@@ -97,4 +159,73 @@ void UMainHUDWidget::DisplayResult(bool IsWin)
         FText ResultText = FText::FromString(ResultString);
         ResultTextBlock->SetText(ResultText);
     }
+}
+
+void UMainHUDWidget::UpdateMinimap()
+{
+    if (CarRefs.Num() == 0)
+    {
+        TArray<AActor*> FoundActors;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACarChaosCarPawnPC::StaticClass(), FoundActors);
+
+        for (AActor* Car : FoundActors)
+        {
+            ACarChaosCarPawnPC* TempCar = Cast<ACarChaosCarPawnPC>(Car);
+            CarRefs.Add(TempCar);
+        }
+    }
+
+    int NumberNPCSDone = 0;
+    for (ACarChaosCarPawnPC* CarRef : CarRefs)
+    {
+        FVector2D TargetLocation = MapWorldToMinimap(CarRef->CarBodyMesh->GetComponentLocation());
+
+        if (CarRef->IsPlayer)
+        {
+            MinimapPlayerImage->SetRenderTranslation(TargetLocation);
+        }
+        else 
+        {
+            if (NumberNPCSDone == 0)
+            {
+                MinimapEnemyImage1->SetRenderTranslation(TargetLocation);
+                NumberNPCSDone++;
+            }
+            else if (NumberNPCSDone == 1)
+            {
+                MinimapEnemyImage2->SetRenderTranslation(TargetLocation);
+                NumberNPCSDone++;
+            }
+            else if (NumberNPCSDone == 2)
+            {
+                MinimapEnemyImage3->SetRenderTranslation(TargetLocation);
+            }
+        }
+    }
+}
+
+FVector2D UMainHUDWidget::MapWorldToMinimap(FVector WorldLocation)
+{
+    const float MinX = FMath::Min(10730.f, -3200.f);
+    const float MaxX = FMath::Max(10730.f, -3200.f);
+    const float MinY = FMath::Min(19250.f, -1400.f);
+    const float MaxY = FMath::Max(19250.f, -1400.f);
+
+    const float Width = MaxX - MinX;
+    const float Height = MaxY - MinY;
+
+    float NormX = (WorldLocation.X - MinX) / Width;
+    float NormY = (WorldLocation.Y - MinY) / Height;
+
+    NormY = 1.f - NormY;
+
+    const FVector2D MinimapSize(454.8f, 312.f);
+
+    FVector2D LocalPos;
+    LocalPos.X = NormY * MinimapSize.X;
+    LocalPos.Y = NormX * MinimapSize.Y;
+
+    FVector2D ScreenPos = FVector2D(20.f, 748.f) + LocalPos;
+
+    return ScreenPos;
 }

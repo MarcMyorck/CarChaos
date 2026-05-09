@@ -4,8 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "CarChaosCarPawnPC.h"
 #include "OilObstacle.generated.h"
+
+class ACarChaosCarPawnPC;
 
 UCLASS()
 class CARCHAOS_API AOilObstacle : public AActor
@@ -14,6 +15,12 @@ class CARCHAOS_API AOilObstacle : public AActor
 
 public:
     AOilObstacle();
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Origin")
+    ACarChaosCarPawnPC* CarRef;
+
+    UFUNCTION(BlueprintCallable, Category = "Activate")
+    void Activate();
 
 protected:
     virtual void BeginPlay() override;

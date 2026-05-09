@@ -2,6 +2,7 @@
 
 #include "OilObstacle.h"
 #include "Components/SphereComponent.h"
+#include "CarChaosCarPawnPC.h"
 #include "TimerManager.h"
 #include "CarChaosPlayerController.h"
 #include <Kismet/GameplayStatics.h>
@@ -21,7 +22,10 @@ AOilObstacle::AOilObstacle()
 void AOilObstacle::BeginPlay()
 {
     Super::BeginPlay();
+}
 
+void AOilObstacle::Activate()
+{
     Collision->OnComponentBeginOverlap.AddDynamic(this, &AOilObstacle::OnOverlap);
 }
 
@@ -42,6 +46,8 @@ void AOilObstacle::OnOverlap(
         TempCar->StartOilSlow();
 
         UGameplayStatics::PlaySoundAtLocation(this, OilSlipSound, GetActorLocation(), 4.f);
+
+        CarRef->OilHit();
 
         TArray<UActorComponent*> Components;
         GetComponents(Components);

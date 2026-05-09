@@ -138,7 +138,7 @@ void ACarChaosRacingGameState::UpdateCarRanking()
 		ACarChaosCarPawnPC* Car = Cars[i];
 		if (Car)
 		{
-			Car->CurrentPosition = i + 1;
+			Car->UpdatePosition(i + 1);
 		}
 	}
 }
