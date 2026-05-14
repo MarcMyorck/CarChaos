@@ -42,6 +42,8 @@ protected:
 
     virtual void BeginPlay() override;
 
+    void SetUpPlayerController();
+
     void UpdateGasBarVisuals();
 
     void UpdateTimeLimitVisuals();
@@ -53,7 +55,10 @@ protected:
     void UpdateLapVisuals();
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
-    UInputMappingContext* InputMappingContext;
+    UInputMappingContext* InputMappingContextP1;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputMappingContext* InputMappingContextP2;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_Drive;
@@ -66,6 +71,18 @@ protected:
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
     UInputAction* IA_Continue;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_Drive1;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_DropOil1;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_DropRocket1;
+
+    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
+    UInputAction* IA_Continue1;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
     TSubclassOf<UMainHUDWidget> MainHUDWidgetClass;

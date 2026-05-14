@@ -17,6 +17,11 @@ void ACarChaosRacingGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (AmountPlayers != 1) 
+	{
+		UGameplayStatics::CreatePlayer(GetWorld(), 1, true);
+	}
+
 	//Set up Checkpoints in Array
 	TArray<AActor*> FoundActorsCheckpoints;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARacingCheckpoint::StaticClass(), FoundActorsCheckpoints);

@@ -24,6 +24,9 @@ class CARCHAOS_API ACarChaosRacingGameState : public AGameStateBase
 public:
 	ACarChaosRacingGameState();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Players")
+	int AmountPlayers = 1;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Checkpoints")
 	TArray<ARacingCheckpoint*> Checkpoints;
 

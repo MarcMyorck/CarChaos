@@ -36,6 +36,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player/Enemy")
 	bool IsPlayer = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player/Enemy")
+	int PlayerIndex = 99;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player/Enemy")
+	int PlayerSlotIndex = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool IsRaceFinished = false;
 

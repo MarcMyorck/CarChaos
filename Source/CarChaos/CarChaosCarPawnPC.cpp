@@ -184,6 +184,12 @@ void ACarChaosCarPawnPC::Tick(float DeltaTime)
 
     if (IsPlayer)
     {
+        if (!MainHUDWidget)
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("NO MAINHUD%f"), 1.2f));
+            return;
+        }
+
         //Only update points and time if pawn is player. Enemies dont need that for now. Other functions wont be executed if its an enemy. 
         //Gas
         UpdateGasBarValue();
