@@ -414,7 +414,12 @@ void ACarChaosCarPawnPC::UpdateCheckpoint(int CheckpointNumber)
         SafeLocation.Z += 50.f;
         FRotator SafeRotation = GameState->Checkpoints[CurrentCheckpoint]->GetActorRotation();
 
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("1 CURRENT LOCATION: %f, %f, %f"), CarBodyMesh->GetComponentLocation().X, CarBodyMesh->GetComponentLocation().Y, CarBodyMesh->GetComponentLocation().Z));
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("2 SAFE LOCATION: %f, %f, %f"), SafeLocation.X, SafeLocation.Y, SafeLocation.Z));
+
         CarBodyMesh->SetWorldLocationAndRotation(SafeLocation, SafeRotation);
+
+        GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("3 CURRENT LOCATION: %f, %f, %f"), CarBodyMesh->GetComponentLocation().X, CarBodyMesh->GetComponentLocation().Y, CarBodyMesh->GetComponentLocation().Z));
 
         CarBodyMesh->SetSimulatePhysics(true);
     }
